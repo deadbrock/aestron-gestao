@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - AESTRON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+            color: white;
+        }
+        .sidebar a {
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar a:hover { background-color: #495057; }
+        .sidebar a.active { background-color: #495057; font-weight: bold; }
+        .content { margin-left: 250px; padding: 20px; }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stat-card { padding: 20px; text-align: center; }
+        .stat-value { font-size: 28px; font-weight: bold; margin: 10px 0; }
+        .stat-label { color: #6c757d; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h3 class="text-center mb-4">AESTRON MEI</h3>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/receitas}"><i class="bi bi-cash-coin"></i> Receitas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/despesas}"><i class="bi bi-cash-stack"></i> Despesas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/obrigacoes-mei}"><i class="bi bi-calendar-check"></i> Obrigações MEI</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/portfolio}"><i class="bi bi-briefcase"></i> Portfolio</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/leads}"><i class="bi bi-person-lines-fill"></i> Leads</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/campanhas}"><i class="bi bi-megaphone"></i> Campanhas</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/relatorios}"><i class="bi bi-graph-up"></i> Relatórios</a></li>
+        </ul>
+    </div>
+    
+    <div class="content">
+<h1 class="mb-4"><i class="bi bi-file-earmark-bar-graph"></i> Relatórios Gerenciais</h1>
+        
+        <!-- Filtro de Período -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Data Início</label>
+                        <input type="date" class="form-control" id="dataInicio">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Data Fim</label>
+                        <input type="date" class="form-control" id="dataFim">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-primary w-100" onclick="gerarRelatorios()">
+                            <i class="bi bi-search"></i> Gerar Relatórios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Relatório Financeiro -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-cash-stack"></i> Relatório Financeiro
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-4 text-center">
+                        <h2 class="text-success" id="relReceitaTotal">R$ 0,00</h2>
+                        <p>Total Receitas</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h2 class="text-danger" id="relDespesaTotal">R$ 0,00</h2>
+                        <p>Total Despesas</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h2 class="text-primary" id="relLucro">R$ 0,00</h2>
+                        <p>Lucro Líquido</p>
+                    </div>
+                </div>
+                
+                <canvas id="chartFinanceiro" height="80"></canvas>
+            </div>
+        </div>
+        
+        <!-- Relatório de Leads -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-people"></i> Relatório de Leads
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartLeads" height="200"></canvas>
+                        <div class="mt-3">
+                            <h5>Taxa de Conversão</h5>
+                            <div class="progress" style="height: 30px;">
+                                <div id="progressConversao" class="progress-bar bg-success" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-megaphone"></i> Relatório de Campanhas
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartCampanhas" height="200"></canvas>
+                        <div class="mt-3 text-center">
+                            <h3 id="totalCampanhasAtivas" class="text-success">0</h3>
+                            <p>Campanhas Ativas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botões de Exportação -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-download"></i> Exportar Relatórios
+            </div>
+            <div class="card-body text-center">
+                <p class="text-muted">Em desenvolvimento - Funcionalidade de exportação em PDF e Excel será adicionada em breve</p>
+                <button class="btn btn-secondary" disabled>
+                    <i class="bi bi-file-pdf"></i> Exportar PDF
+                </button>
+                <button class="btn btn-secondary" disabled>
+                    <i class="bi bi-file-excel"></i> Exportar Excel
+                </button>
+            </div>
+        </div>
+        
+        <script>
+            let chartFinanceiro, chartLeads, chartCampanhas;
+            
+            async function gerarRelatorios() {
+                const inicio = document.getElementById('dataInicio').value;
+                const fim = document.getElementById('dataFim').value;
+                
+                if (!inicio || !fim) {
+                    exibirMensagem('warning', 'Por favor, selecione o período');
+                    return;
+                }
+                
+                try {
+                    // Relatório Financeiro
+                    const respFinanceiro = await fetch(`/api/dashboard/financeiro?inicio=${inicio}&fim=${fim}`);
+                    const dataFinanceiro = await respFinanceiro.json();
+                    
+                    document.getElementById('relReceitaTotal').textContent = formatarMoeda(dataFinanceiro.totalReceitas);
+                    document.getElementById('relDespesaTotal').textContent = formatarMoeda(dataFinanceiro.totalDespesas);
+                    const lucro = dataFinanceiro.totalReceitas - dataFinanceiro.totalDespesas;
+                    document.getElementById('relLucro').textContent = formatarMoeda(lucro);
+                    
+                    // Relatório Comercial
+                    const respComercial = await fetch('/api/dashboard/comercial');
+                    const dataComercial = await respComercial.json();
+                    
+                    const conversao = dataComercial.taxaConversao30dias || 0;
+                    document.getElementById('progressConversao').style.width = conversao + '%';
+                    document.getElementById('progressConversao').textContent = conversao.toFixed(1) + '%';
+                    
+                    // Campanhas
+                    const respCampanhas = await fetch('/api/campanhas/ativas');
+                    const campanhasAtivas = await respCampanhas.json();
+                    document.getElementById('totalCampanhasAtivas').textContent = campanhasAtivas.length;
+                    
+                    // Atualizar gráficos
+                    atualizarGraficos(dataFinanceiro, dataComercial);
+                    
+                    exibirMensagem('success', 'Relatórios gerados com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao gerar relatórios:', error);
+                    exibirMensagem('danger', 'Erro ao gerar relatórios');
+                }
+            }
+            
+            function atualizarGraficos(dataFinanceiro, dataComercial) {
+                // Gráfico Financeiro
+                const ctxFinanceiro = document.getElementById('chartFinanceiro').getContext('2d');
+                if (chartFinanceiro) chartFinanceiro.destroy();
+                
+                chartFinanceiro = new Chart(ctxFinanceiro, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Receitas', 'Despesas'],
+                        datasets: [{
+                            label: 'Valores (R$)',
+                            data: [dataFinanceiro.totalReceitas || 0, dataFinanceiro.totalDespesas || 0],
+                            backgroundColor: [
+                                'rgba(39, 174, 96, 0.7)',
+                                'rgba(231, 76, 60, 0.7)'
+                            ]
+                        }]
+                    }
+                });
+                
+                // Gráfico de Leads
+                const ctxLeads = document.getElementById('chartLeads').getContext('2d');
+                if (chartLeads) chartLeads.destroy();
+                
+                const statusData = dataComercial.estatisticasPorStatus || [];
+                const labels = statusData.map(s => s[0]);
+                const valores = statusData.map(s => s[1]);
+                
+                chartLeads = new Chart(ctxLeads, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels.length > 0 ? labels : ['Sem dados'],
+                        datasets: [{
+                            data: valores.length > 0 ? valores : [1],
+                            backgroundColor: [
+                                '#3498db', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c'
+                            ]
+                        }]
+                    }
+                });
+                
+                // Gráfico de Campanhas
+                const ctxCampanhas = document.getElementById('chartCampanhas').getContext('2d');
+                if (chartCampanhas) chartCampanhas.destroy();
+                
+                chartCampanhas = new Chart(ctxCampanhas, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Email', 'Redes Sociais', 'Google Ads', 'WhatsApp', 'Outros'],
+                        datasets: [{
+                            data: [30, 25, 20, 15, 10],
+                            backgroundColor: [
+                                '#3498db', '#2ecc71', '#f39c12', '#25D366', '#95a5a6'
+                            ]
+                        }]
+                    }
+                });
+            }
+            
+            // Definir período padrão (mês atual)
+            document.addEventListener('DOMContentLoaded', function() {
+                const hoje = new Date();
+                const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                
+                document.getElementById('dataInicio').value = primeiroDia.toISOString().split('T')[0];
+                document.getElementById('dataFim').value = hoje.toISOString().split('T')[0];
+                
+                gerarRelatorios();
+            });
+        </script>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+        }
+        
+        function formatarData(data) {
+            return new Date(data).toLocaleDateString('pt-BR');
+        }
+        
+        function exibirMensagem(tipo, mensagem) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-$${tipo} alert-dismissible fade show`;
+            alertDiv.innerHTML = `$${mensagem}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            document.querySelector('.content').insertBefore(alertDiv, document.querySelector('.content').firstChild);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+    </script>
+</body>
+</html>

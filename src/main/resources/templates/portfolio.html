@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - AESTRON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+            color: white;
+        }
+        .sidebar a {
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar a:hover { background-color: #495057; }
+        .sidebar a.active { background-color: #495057; font-weight: bold; }
+        .content { margin-left: 250px; padding: 20px; }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stat-card { padding: 20px; text-align: center; }
+        .stat-value { font-size: 28px; font-weight: bold; margin: 10px 0; }
+        .stat-label { color: #6c757d; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h3 class="text-center mb-4">AESTRON MEI</h3>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/receitas}"><i class="bi bi-cash-coin"></i> Receitas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/despesas}"><i class="bi bi-cash-stack"></i> Despesas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/obrigacoes-mei}"><i class="bi bi-calendar-check"></i> Obrigações MEI</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/portfolio}"><i class="bi bi-briefcase"></i> Portfolio</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/leads}"><i class="bi bi-person-lines-fill"></i> Leads</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/campanhas}"><i class="bi bi-megaphone"></i> Campanhas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/relatorios}"><i class="bi bi-graph-up"></i> Relatórios</a></li>
+        </ul>
+    </div>
+    
+    <div class="content">
+<div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-box-seam"></i> Portfolio de Produtos e Serviços</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPortfolio">
+                <i class="bi bi-plus-circle"></i> Novo Produto/Serviço
+            </button>
+        </div>
+        
+        <!-- Resumo -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card bg-primary text-white">
+                    <div class="stat-label">Total de Produtos</div>
+                    <div class="stat-value" id="totalProdutos">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-success text-white">
+                    <div class="stat-label">Produtos Ativos</div>
+                    <div class="stat-value" id="produtosAtivos">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-warning text-white">
+                    <div class="stat-label">Em Destaque</div>
+                    <div class="stat-value" id="produtosDestaque">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-info text-white">
+                    <div class="stat-label">Categorias</div>
+                    <div class="stat-value" id="totalCategorias">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grid de Produtos -->
+        <div id="gridPortfolio" class="row">
+            <!-- Será preenchido dinamicamente -->
+        </div>
+        
+        <!-- Modal Novo/Editar Portfolio -->
+        <div class="modal fade" id="modalPortfolio" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Novo Produto/Serviço</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formPortfolio">
+                            <input type="hidden" id="portfolioId">
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">Nome do Produto/Serviço *</label>
+                                    <input type="text" class="form-control" id="nomePortfolio" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Tipo *</label>
+                                    <select class="form-select" id="tipoPortfolio" required>
+                                        <option value="SOFTWARE_SOB_MEDIDA">Software Sob Medida</option>
+                                        <option value="SOFTWARE_PRONTO">Software Pronto</option>
+                                        <option value="EQUIPAMENTO_HARDWARE">Equipamento de Hardware</option>
+                                        <option value="SERVICO_TI">Serviço de TI</option>
+                                        <option value="INFRAESTRUTURA">Infraestrutura e Redes</option>
+                                        <option value="SEGURANCA">Câmeras e Segurança</option>
+                                        <option value="CONSULTORIA">Consultoria</option>
+                                        <option value="MANUTENCAO">Manutenção e Suporte</option>
+                                        <option value="PACOTE">Pacote de Serviços</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Descrição</label>
+                                    <textarea class="form-control" id="descricaoPortfolio" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Preço (R$)</label>
+                                    <input type="number" step="0.01" class="form-control" id="precoPortfolio">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Custo de Produção (R$)</label>
+                                    <input type="number" step="0.01" class="form-control" id="custoProducao">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Categoria</label>
+                                    <input type="text" class="form-control" id="categoriaPortfolio" 
+                                           placeholder="Ex: ERP, E-commerce, Infraestrutura">
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Especificações Técnicas</label>
+                                    <textarea class="form-control" id="especificacoes" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Benefícios</label>
+                                    <textarea class="form-control" id="beneficios" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Tempo de Entrega (dias)</label>
+                                    <input type="number" class="form-control" id="tempoEntrega">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Garantia (meses)</label>
+                                    <input type="number" class="form-control" id="garantiaMeses">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Quantidade em Estoque</label>
+                                    <input type="number" class="form-control" id="estoque">
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="ativo" checked>
+                                        <label class="form-check-label" for="ativo">Produto Ativo</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="destaque">
+                                        <label class="form-check-label" for="destaque">Produto em Destaque</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="salvarPortfolio()">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            async function carregarPortfolio() {
+                try {
+                    const response = await fetch('/api/portfolio');
+                    const produtos = await response.json();
+                    
+                    const grid = document.getElementById('gridPortfolio');
+                    grid.innerHTML = '';
+                    
+                    if (produtos.length === 0) {
+                        grid.innerHTML = '<div class="col-12"><div class="alert alert-info">Nenhum produto cadastrado ainda.</div></div>';
+                        return;
+                    }
+                    
+                    produtos.forEach(produto => {
+                        const lucro = produto.preco && produto.custoProducao ? 
+                                     (produto.preco - produto.custoProducao) : 0;
+                        const margemLucro = produto.preco && produto.custoProducao ? 
+                                           ((lucro / produto.preco) * 100).toFixed(1) : 0;
+                        
+                        const col = document.createElement('div');
+                        col.className = 'col-md-4 mb-4';
+                        col.innerHTML = `
+                            <div class="card h-100 ${produto.destaque ? 'border-warning' : ''}">
+                                ${produto.destaque ? '<div class="badge bg-warning position-absolute top-0 end-0 m-2">Destaque</div>' : ''}
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        ${produto.nome}
+                                        ${!produto.ativo ? '<span class="badge bg-secondary">Inativo</span>' : ''}
+                                    </h5>
+                                    <p class="text-muted"><small><i class="bi bi-tag"></i> ${produto.tipo}</small></p>
+                                    ${produto.descricao ? `<p class="card-text">${produto.descricao}</p>` : ''}
+                                    
+                                    ${produto.preco ? `
+                                        <div class="mb-2">
+                                            <strong class="text-success">Preço: ${formatarMoeda(produto.preco)}</strong><br>
+                                            ${produto.custoProducao ? `
+                                                <small class="text-muted">
+                                                    Custo: ${formatarMoeda(produto.custoProducao)} | 
+                                                    Margem: ${margemLucro}%
+                                                </small>
+                                            ` : ''}
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${produto.tempoEntregaDias ? `<small><i class="bi bi-clock"></i> Entrega: ${produto.tempoEntregaDias} dias</small><br>` : ''}
+                                    ${produto.garantiaMeses ? `<small><i class="bi bi-shield-check"></i> Garantia: ${produto.garantiaMeses} meses</small><br>` : ''}
+                                    ${produto.quantidadeEstoque !== null ? `<small><i class="bi bi-boxes"></i> Estoque: ${produto.quantidadeEstoque}</small>` : ''}
+                                </div>
+                                <div class="card-footer">
+                                    <button class="btn btn-sm btn-primary" onclick="editarPortfolio(${produto.id})">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </button>
+                                    ${produto.ativo ? 
+                                        `<button class="btn btn-sm btn-warning" onclick="desativarPortfolio(${produto.id})">
+                                            <i class="bi bi-eye-slash"></i> Desativar
+                                        </button>` :
+                                        `<button class="btn btn-sm btn-success" onclick="ativarPortfolio(${produto.id})">
+                                            <i class="bi bi-eye"></i> Ativar
+                                        </button>`}
+                                    <button class="btn btn-sm btn-danger" onclick="deletarPortfolio(${produto.id})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(col);
+                    });
+                    
+                    atualizarResumoPortfolio(produtos);
+                } catch (error) {
+                    console.error('Erro ao carregar portfolio:', error);
+                }
+            }
+            
+            function atualizarResumoPortfolio(produtos) {
+                const ativos = produtos.filter(p => p.ativo).length;
+                const destaques = produtos.filter(p => p.destaque).length;
+                const categorias = [...new Set(produtos.map(p => p.categoria).filter(c => c))].length;
+                
+                document.getElementById('totalProdutos').textContent = produtos.length;
+                document.getElementById('produtosAtivos').textContent = ativos;
+                document.getElementById('produtosDestaque').textContent = destaques;
+                document.getElementById('totalCategorias').textContent = categorias;
+            }
+            
+            async function salvarPortfolio() {
+                const portfolio = {
+                    nome: document.getElementById('nomePortfolio').value,
+                    tipo: document.getElementById('tipoPortfolio').value,
+                    descricao: document.getElementById('descricaoPortfolio').value,
+                    preco: document.getElementById('precoPortfolio').value ? 
+                           parseFloat(document.getElementById('precoPortfolio').value) : null,
+                    custoProducao: document.getElementById('custoProducao').value ? 
+                                   parseFloat(document.getElementById('custoProducao').value) : null,
+                    categoria: document.getElementById('categoriaPortfolio').value,
+                    especificacoesTecnicas: document.getElementById('especificacoes').value,
+                    beneficios: document.getElementById('beneficios').value,
+                    tempoEntregaDias: document.getElementById('tempoEntrega').value ? 
+                                     parseInt(document.getElementById('tempoEntrega').value) : null,
+                    garantiaMeses: document.getElementById('garantiaMeses').value ? 
+                                  parseInt(document.getElementById('garantiaMeses').value) : null,
+                    quantidadeEstoque: document.getElementById('estoque').value ? 
+                                      parseInt(document.getElementById('estoque').value) : null,
+                    ativo: document.getElementById('ativo').checked,
+                    destaque: document.getElementById('destaque').checked
+                };
+                
+                try {
+                    await fetch('/api/portfolio', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(portfolio)
+                    });
+                    
+                    bootstrap.Modal.getInstance(document.getElementById('modalPortfolio')).hide();
+                    document.getElementById('formPortfolio').reset();
+                    carregarPortfolio();
+                    exibirMensagem('success', 'Produto cadastrado com sucesso!');
+                } catch (error) {
+                    exibirMensagem('danger', 'Erro ao salvar produto');
+                }
+            }
+            
+            async function ativarPortfolio(id) {
+                try {
+                    await fetch(`/api/portfolio/${id}/ativar`, { method: 'PATCH' });
+                    carregarPortfolio();
+                    exibirMensagem('success', 'Produto ativado!');
+                } catch (error) {
+                    exibirMensagem('danger', 'Erro ao ativar produto');
+                }
+            }
+            
+            async function desativarPortfolio(id) {
+                try {
+                    await fetch(`/api/portfolio/${id}/desativar`, { method: 'PATCH' });
+                    carregarPortfolio();
+                    exibirMensagem('success', 'Produto desativado!');
+                } catch (error) {
+                    exibirMensagem('danger', 'Erro ao desativar produto');
+                }
+            }
+            
+            async function deletarPortfolio(id) {
+                if (!confirm('Deseja realmente excluir este produto?')) return;
+                
+                try {
+                    await fetch(`/api/portfolio/${id}`, { method: 'DELETE' });
+                    carregarPortfolio();
+                    exibirMensagem('success', 'Produto excluído com sucesso!');
+                } catch (error) {
+                    exibirMensagem('danger', 'Erro ao excluir produto');
+                }
+            }
+            
+            document.addEventListener('DOMContentLoaded', carregarPortfolio);
+        </script>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+        }
+        
+        function formatarData(data) {
+            return new Date(data).toLocaleDateString('pt-BR');
+        }
+        
+        function exibirMensagem(tipo, mensagem) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-$${tipo} alert-dismissible fade show`;
+            alertDiv.innerHTML = `$${mensagem}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            document.querySelector('.content').insertBefore(alertDiv, document.querySelector('.content').firstChild);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+    </script>
+</body>
+</html>

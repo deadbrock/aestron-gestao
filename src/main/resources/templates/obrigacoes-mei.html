@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obrigações MEI - AESTRON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+            color: white;
+        }
+        .sidebar a {
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar a:hover { background-color: #495057; }
+        .content { margin-left: 250px; padding: 20px; }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stat-card { padding: 20px; text-align: center; }
+        .stat-value { font-size: 28px; font-weight: bold; margin: 10px 0; }
+        .stat-label { color: #6c757d; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h3 class="text-center mb-4">AESTRON MEI</h3>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/receitas}"><i class="bi bi-cash-coin"></i> Receitas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/despesas}"><i class="bi bi-cash-stack"></i> Despesas</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/obrigacoes-mei}"><i class="bi bi-calendar-check"></i> Obrigações MEI</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/portfolio}"><i class="bi bi-briefcase"></i> Portfolio</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/leads}"><i class="bi bi-person-lines-fill"></i> Leads</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/campanhas}"><i class="bi bi-megaphone"></i> Campanhas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/relatorios}"><i class="bi bi-graph-up"></i> Relatórios</a></li>
+        </ul>
+    </div>
+    
+    <div class="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-calendar-check"></i> Obrigações MEI</h1>
+            <div>
+                <button class="btn btn-warning" onclick="gerarDAS(2026)">
+                    <i class="bi bi-calendar-plus"></i> Gerar DAS 2026
+                </button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalObrigacao">
+                    <i class="bi bi-plus-circle"></i> Nova Obrigação
+                </button>
+            </div>
+        </div>
+        
+        <!-- Alertas -->
+        <div id="alertasObrigacoes" class="mb-4"></div>
+        
+        <!-- Resumo -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body stat-card">
+                        <div class="stat-label text-white">Pendentes</div>
+                        <div class="stat-value" id="totalPendentes">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body stat-card">
+                        <div class="stat-label text-white">Vencidas</div>
+                        <div class="stat-value" id="totalVencidas">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body stat-card">
+                        <div class="stat-label text-white">Pagas</div>
+                        <div class="stat-value" id="totalPagas">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body stat-card">
+                        <div class="stat-label text-white">Próximas (15 dias)</div>
+                        <div class="stat-value" id="totalProximas">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Calendário de DAS 2026 -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-calendar3"></i> Calendário DAS 2026
+            </div>
+            <div class="card-body">
+                <div class="row" id="calendarioDAS">
+                    <!-- Será preenchido dinamicamente -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabela de Obrigações -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-list-check"></i> Todas as Obrigações
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Vencimento</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaObrigacoes">
+                            <tr>
+                                <td colspan="6" class="text-center">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Nova Obrigação -->
+        <div class="modal fade" id="modalObrigacao" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Nova Obrigação</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formObrigacao">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo *</label>
+                                <select class="form-select" id="tipo" required>
+                                    <option value="DAS">DAS - Documento de Arrecadação</option>
+                                    <option value="DASN_SIMEI">DASN-SIMEI - Declaração Anual</option>
+                                    <option value="ALVARA">Alvará de Funcionamento</option>
+                                    <option value="RENOVACAO_CERTIFICADO">Renovação Certificado Digital</option>
+                                    <option value="OUTROS">Outras Obrigações</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Descrição *</label>
+                                <input type="text" class="form-control" id="descricaoObrigacao" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Data de Vencimento *</label>
+                                <input type="date" class="form-control" id="dataVencimento" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Valor</label>
+                                <input type="number" step="0.01" class="form-control" id="valorObrigacao">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="salvarObrigacao()">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Marcar como Pago -->
+        <div class="modal fade" id="modalPagamento" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Marcar como Pago</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="obrigacaoIdPagamento">
+                        <div class="mb-3">
+                            <label class="form-label">Data de Pagamento</label>
+                            <input type="date" class="form-control" id="dataPagamento" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Número do Comprovante</label>
+                            <input type="text" class="form-control" id="numeroComprovante">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-success" onclick="confirmarPagamento()">
+                            Confirmar Pagamento
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+        }
+        
+        function formatarData(data) {
+            return new Date(data).toLocaleDateString('pt-BR');
+        }
+        
+        function exibirMensagem(tipo, mensagem) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+            alertDiv.innerHTML = `${mensagem}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            document.querySelector('.content').insertBefore(alertDiv, document.querySelector('.content').firstChild);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+        
+        async function carregarObrigacoes() {
+            try {
+                const response = await fetch('/api/obrigacoes-mei');
+                const obrigacoes = await response.json();
+                
+                const tbody = document.getElementById('tabelaObrigacoes');
+                tbody.innerHTML = '';
+                
+                if (obrigacoes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma obrigação cadastrada</td></tr>';
+                    return;
+                }
+                
+                obrigacoes.forEach(obrigacao => {
+                    const tr = document.createElement('tr');
+                    const statusClass = obrigacao.status === 'PAGO' ? 'success' : 
+                                      obrigacao.status === 'VENCIDO' ? 'danger' : 'warning';
+                    
+                    tr.innerHTML = `
+                        <td><span class="badge bg-secondary">${obrigacao.tipo}</span></td>
+                        <td>${obrigacao.descricao}</td>
+                        <td>${formatarData(obrigacao.dataVencimento)}</td>
+                        <td>${obrigacao.valor ? formatarMoeda(obrigacao.valor) : '-'}</td>
+                        <td><span class="badge bg-${statusClass}">${obrigacao.status}</span></td>
+                        <td>
+                            ${obrigacao.status === 'PENDENTE' || obrigacao.status === 'VENCIDO' ? 
+                                `<button class="btn btn-sm btn-success" onclick="abrirModalPagamento(${obrigacao.id})">
+                                    <i class="bi bi-check-circle"></i> Pagar
+                                </button>` : ''}
+                            <button class="btn btn-sm btn-danger" onclick="deletarObrigacao(${obrigacao.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                atualizarResumoObrigacoes(obrigacoes);
+                gerarCalendarioDAS(obrigacoes);
+                verificarAlertasObrigacoes(obrigacoes);
+            } catch (error) {
+                console.error('Erro ao carregar obrigações:', error);
+            }
+        }
+        
+        function atualizarResumoObrigacoes(obrigacoes) {
+            const pendentes = obrigacoes.filter(o => o.status === 'PENDENTE').length;
+            const vencidas = obrigacoes.filter(o => o.status === 'VENCIDO').length;
+            const pagas = obrigacoes.filter(o => o.status === 'PAGO').length;
+            
+            const hoje = new Date();
+            const limite = new Date();
+            limite.setDate(limite.getDate() + 15);
+            const proximas = obrigacoes.filter(o => {
+                const venc = new Date(o.dataVencimento);
+                return o.status === 'PENDENTE' && venc >= hoje && venc <= limite;
+            }).length;
+            
+            document.getElementById('totalPendentes').textContent = pendentes;
+            document.getElementById('totalVencidas').textContent = vencidas;
+            document.getElementById('totalPagas').textContent = pagas;
+            document.getElementById('totalProximas').textContent = proximas;
+        }
+        
+        function gerarCalendarioDAS(obrigacoes) {
+            const calendario = document.getElementById('calendarioDAS');
+            calendario.innerHTML = '';
+            
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const dasObrigacoes = obrigacoes.filter(o => o.tipo === 'DAS' && o.anoReferencia === 2026);
+            
+            meses.forEach((mes, index) => {
+                const dasDoMes = dasObrigacoes.find(o => o.mesReferencia === index + 1);
+                const cardClass = dasDoMes ? 
+                    (dasDoMes.status === 'PAGO' ? 'border-success' : 
+                     dasDoMes.status === 'VENCIDO' ? 'border-danger' : 'border-warning') : 
+                    'border-secondary';
+                
+                const col = document.createElement('div');
+                col.className = 'col-md-2 col-sm-4 mb-3';
+                col.innerHTML = `
+                    <div class="card ${cardClass}" style="border-width: 3px;">
+                        <div class="card-body text-center p-2">
+                            <h6 class="mb-1">${mes}</h6>
+                            ${dasDoMes ? 
+                                `<small class="badge bg-${cardClass.replace('border-', '')}">
+                                    ${dasDoMes.status}
+                                </small>` : 
+                                '<small class="text-muted">Não gerado</small>'}
+                        </div>
+                    </div>
+                `;
+                calendario.appendChild(col);
+            });
+        }
+        
+        function verificarAlertasObrigacoes(obrigacoes) {
+            const vencidas = obrigacoes.filter(o => o.status === 'VENCIDO');
+            const alertas = document.getElementById('alertasObrigacoes');
+            
+            if (vencidas.length > 0) {
+                alertas.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Atenção!</strong> Você tem ${vencidas.length} obrigação(ões) vencida(s)!
+                    </div>
+                `;
+            }
+        }
+        
+        async function gerarDAS(ano) {
+            if (!confirm(`Gerar DAS para todo o ano de ${ano}?`)) return;
+            
+            try {
+                await fetch(`/api/obrigacoes-mei/gerar-das/${ano}`, { method: 'POST' });
+                carregarObrigacoes();
+                exibirMensagem('success', `DAS gerado com sucesso para ${ano}!`);
+            } catch (error) {
+                exibirMensagem('danger', 'Erro ao gerar DAS');
+            }
+        }
+        
+        function abrirModalPagamento(id) {
+            document.getElementById('obrigacaoIdPagamento').value = id;
+            document.getElementById('dataPagamento').value = new Date().toISOString().split('T')[0];
+            new bootstrap.Modal(document.getElementById('modalPagamento')).show();
+        }
+        
+        async function confirmarPagamento() {
+            const id = document.getElementById('obrigacaoIdPagamento').value;
+            const dataPagamento = document.getElementById('dataPagamento').value;
+            const comprovante = document.getElementById('numeroComprovante').value;
+            
+            try {
+                await fetch(`/api/obrigacoes-mei/${id}/marcar-pago?dataPagamento=${dataPagamento}&comprovante=${comprovante}`, 
+                    { method: 'PATCH' });
+                
+                bootstrap.Modal.getInstance(document.getElementById('modalPagamento')).hide();
+                carregarObrigacoes();
+                exibirMensagem('success', 'Pagamento registrado com sucesso!');
+            } catch (error) {
+                exibirMensagem('danger', 'Erro ao registrar pagamento');
+            }
+        }
+        
+        async function salvarObrigacao() {
+            const obrigacao = {
+                tipo: document.getElementById('tipo').value,
+                descricao: document.getElementById('descricaoObrigacao').value,
+                dataVencimento: document.getElementById('dataVencimento').value,
+                valor: document.getElementById('valorObrigacao').value ? 
+                       parseFloat(document.getElementById('valorObrigacao').value) : null,
+                status: 'PENDENTE',
+                mesReferencia: new Date(document.getElementById('dataVencimento').value).getMonth() + 1,
+                anoReferencia: new Date(document.getElementById('dataVencimento').value).getFullYear()
+            };
+            
+            try {
+                await fetch('/api/obrigacoes-mei', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(obrigacao)
+                });
+                
+                bootstrap.Modal.getInstance(document.getElementById('modalObrigacao')).hide();
+                document.getElementById('formObrigacao').reset();
+                carregarObrigacoes();
+                exibirMensagem('success', 'Obrigação cadastrada com sucesso!');
+            } catch (error) {
+                exibirMensagem('danger', 'Erro ao salvar obrigação');
+            }
+        }
+        
+        async function deletarObrigacao(id) {
+            if (!confirm('Deseja realmente excluir esta obrigação?')) return;
+            
+            try {
+                await fetch(`/api/obrigacoes-mei/${id}`, { method: 'DELETE' });
+                carregarObrigacoes();
+                exibirMensagem('success', 'Obrigação excluída com sucesso!');
+            } catch (error) {
+                exibirMensagem('danger', 'Erro ao excluir obrigação');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', carregarObrigacoes);
+    </script>
+</body>
+</html>

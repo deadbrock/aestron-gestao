@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout}">
+<head>
+    <th:block th:fragment="titulo">Dashboard - AESTRON</th:block>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-speedometer2"></i> Dashboard Principal</h1>
+            <div>
+                <button class="btn btn-aestron" onclick="atualizarDashboard()">
+                    <i class="bi bi-arrow-clockwise"></i> Atualizar
+                </button>
+            </div>
+        </div>
+        
+        <!-- Alertas de Obrigações -->
+        <div id="alertas" class="mb-4"></div>
+        
+        <!-- Métricas Financeiras -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card bg-success text-white">
+                    <i class="bi bi-cash-stack" style="font-size: 48px; opacity: 0.3;"></i>
+                    <div class="stat-label">Receita Mensal</div>
+                    <div class="stat-value" id="receitaMensal">R$ 0,00</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-danger text-white">
+                    <i class="bi bi-wallet2" style="font-size: 48px; opacity: 0.3;"></i>
+                    <div class="stat-label">Despesa Mensal</div>
+                    <div class="stat-value" id="despesaMensal">R$ 0,00</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-primary text-white">
+                    <i class="bi bi-graph-up-arrow" style="font-size: 48px; opacity: 0.3;"></i>
+                    <div class="stat-label">Lucro Mensal</div>
+                    <div class="stat-value" id="lucroMensal">R$ 0,00</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-info text-white">
+                    <i class="bi bi-calendar-year" style="font-size: 48px; opacity: 0.3;"></i>
+                    <div class="stat-label">Receita Anual</div>
+                    <div class="stat-value" id="receitaAnual">R$ 0,00</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Limite MEI -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-info-circle"></i> Limite de Faturamento MEI 2026
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Faturamento Anual: <strong id="faturamentoAtual">R$ 0,00</strong></span>
+                            <span>Limite: <strong>R$ 81.000,00</strong></span>
+                        </div>
+                        <div class="progress" style="height: 30px;">
+                            <div id="progressLimite" class="progress-bar" role="progressbar" 
+                                 style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                0%
+                            </div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            Mantenha-se dentro do limite para não perder os benefícios do MEI
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Obrigações e CRM -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-calendar-check"></i> Obrigações MEI
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h3 id="obrigacoesPendentes" class="text-warning">0</h3>
+                                <small>Pendentes</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 id="obrigacoesVencidas" class="text-danger">0</h3>
+                                <small>Vencidas</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 id="proximasObrigacoes" class="text-info">0</h3>
+                                <small>Próximas (15 dias)</small>
+                            </div>
+                        </div>
+                        <a th:href="@{/obrigacoes-mei}" class="btn btn-sm btn-aestron w-100 mt-3">
+                            Ver Todas as Obrigações
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-people"></i> Funil de Vendas
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h3 id="totalLeads" class="text-primary">0</h3>
+                                <small>Total Leads</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 id="leadsNovos" class="text-success">0</h3>
+                                <small>Novos</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 id="taxaConversao" class="text-warning">0%</h3>
+                                <small>Taxa Conversão</small>
+                            </div>
+                        </div>
+                        <a th:href="@{/leads}" class="btn btn-sm btn-aestron w-100 mt-3">
+                            Gerenciar Leads
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gráficos -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-bar-chart"></i> Receitas vs Despesas (Mensal)
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartFinanceiro" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-pie-chart"></i> Campanhas Ativas
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <h2 id="campanhasAtivas" class="text-primary">0</h2>
+                            <p>Campanhas em execução</p>
+                        </div>
+                        <canvas id="chartCampanhas" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            let chartFinanceiro, chartCampanhas;
+            
+            async function atualizarDashboard() {
+                try {
+                    const response = await fetch('/api/dashboard');
+                    const data = await response.json();
+                    
+                    // Atualizar métricas financeiras
+                    document.getElementById('receitaMensal').textContent = formatarMoeda(data.receitaMensal);
+                    document.getElementById('despesaMensal').textContent = formatarMoeda(data.despesaMensal);
+                    document.getElementById('lucroMensal').textContent = formatarMoeda(data.lucroMensal);
+                    document.getElementById('receitaAnual').textContent = formatarMoeda(data.receitaAnual);
+                    
+                    // Atualizar limite MEI
+                    const percentual = data.percentualLimite.toFixed(2);
+                    document.getElementById('faturamentoAtual').textContent = formatarMoeda(data.receitaAnual);
+                    document.getElementById('progressLimite').style.width = percentual + '%';
+                    document.getElementById('progressLimite').textContent = percentual + '%';
+                    
+                    // Definir cor do progresso
+                    const progressBar = document.getElementById('progressLimite');
+                    progressBar.className = 'progress-bar';
+                    if (percentual < 70) {
+                        progressBar.classList.add('bg-success');
+                    } else if (percentual < 90) {
+                        progressBar.classList.add('bg-warning');
+                    } else {
+                        progressBar.classList.add('bg-danger');
+                    }
+                    
+                    // Atualizar obrigações
+                    document.getElementById('obrigacoesPendentes').textContent = data.obrigacoesPendentes;
+                    document.getElementById('obrigacoesVencidas').textContent = data.obrigacoesVencidas;
+                    document.getElementById('proximasObrigacoes').textContent = data.proximasObrigacoes;
+                    
+                    // Alertas de obrigações vencidas
+                    if (data.obrigacoesVencidas > 0) {
+                        document.getElementById('alertas').innerHTML = `
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <strong>Atenção!</strong> Você tem ${data.obrigacoesVencidas} obrigação(ões) vencida(s)!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `;
+                    }
+                    
+                    // Atualizar CRM
+                    document.getElementById('totalLeads').textContent = data.totalLeads;
+                    document.getElementById('leadsNovos').textContent = data.leadsNovos;
+                    document.getElementById('taxaConversao').textContent = data.taxaConversao30dias.toFixed(1) + '%';
+                    document.getElementById('campanhasAtivas').textContent = data.campanhasAtivas;
+                    
+                    // Atualizar gráficos
+                    atualizarGraficos(data);
+                    
+                } catch (error) {
+                    console.error('Erro ao carregar dashboard:', error);
+                    exibirMensagem('danger', 'Erro ao carregar dados do dashboard');
+                }
+            }
+            
+            function atualizarGraficos(data) {
+                // Gráfico Financeiro
+                const ctxFinanceiro = document.getElementById('chartFinanceiro').getContext('2d');
+                if (chartFinanceiro) chartFinanceiro.destroy();
+                
+                chartFinanceiro = new Chart(ctxFinanceiro, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Receitas', 'Despesas', 'Lucro'],
+                        datasets: [{
+                            label: 'Valores em R$',
+                            data: [data.receitaMensal, data.despesaMensal, data.lucroMensal],
+                            backgroundColor: [
+                                'rgba(39, 174, 96, 0.7)',
+                                'rgba(231, 76, 60, 0.7)',
+                                'rgba(52, 152, 219, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(39, 174, 96, 1)',
+                                'rgba(231, 76, 60, 1)',
+                                'rgba(52, 152, 219, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value.toLocaleString('pt-BR');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Carregar dashboard ao iniciar
+            document.addEventListener('DOMContentLoaded', function() {
+                atualizarDashboard();
+            });
+        </script>
+    </div>
+</body>
+</html>
