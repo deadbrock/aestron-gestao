@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout}">
+<head>
+    <th:block th:fragment="titulo">Custos de Operação - AESTRON</th:block>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <!-- Menu Horizontal do Meu Financeiro -->
+        <div th:replace="~{fragments/meu-financeiro-nav :: navbar('custos')}"></div>
+        
+        <!-- Conteúdo Principal -->
+        <div class="mf-content mf-fade-in">
+            <!-- Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);">
+                        <h6>💸 Total Mensal</h6>
+                        <h2 id="totalMensal">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);">
+                        <h6>📊 Total Anual</h6>
+                        <h2 id="totalAnual">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #38bdf8 0%, #7dd3fc 100%);">
+                        <h6>📦 Qtd. Custos</h6>
+                        <h2 id="qtdCustos">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #0891b2 0%, #14b8a6 100%);">
+                        <h6>💰 Média Custo</h6>
+                        <h2 id="mediaCusto">R$ 0,00</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-modern btn-primary-gradient" data-bs-toggle="modal" data-bs-target="#modal">
+                    <i class="bi bi-plus-circle-fill"></i> Novo Custo
+                </button>
+            </div>
+
+            <!-- Tabela -->
+            <div class="card-modern">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Custos Cadastrados</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Valor Mensal</th>
+                                <th>Valor Anual</th>
+                                <th>Recorrente</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela">
+                            <tr><td colspan="5" class="text-center py-4">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modal">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 15px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle-fill"></i> Novo Custo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form">
+                        <div class="mb-3"><input type="text" class="form-control" name="descricao" placeholder="Descrição" required style="border-radius: 10px;"></div>
+                        <div class="mb-3">
+                            <select class="form-select" name="categoria" required style="border-radius: 10px;">
+                                <option value="">Selecione a categoria...</option>
+                                <option value="FIXO">🔒 Custo Fixo</option>
+                                <option value="VARIAVEL">📊 Custo Variável</option>
+                            </select>
+                        </div>
+                        <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valorMensal" placeholder="Valor Mensal" required style="border-radius: 10px;"></div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="recorrente" id="recorrente">
+                                <label class="form-check-label" for="recorrente">💳 Custo Recorrente (mensal)</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-gradient btn-modern" onclick="salvar()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        async function carregar() {
+            try {
+                const res = await fetch('/api/meu-financeiro/custos');
+                const data = await res.json();
+                
+                let totalMensal = 0;
+                (data || []).forEach(c => totalMensal += c.valorMensal);
+                const totalAnual = totalMensal * 12;
+                const qtd = data ? data.length : 0;
+                const media = qtd > 0 ? totalMensal / qtd : 0;
+                
+                document.getElementById('totalMensal').textContent = fmt.format(totalMensal);
+                document.getElementById('totalAnual').textContent = fmt.format(totalAnual);
+                document.getElementById('qtdCustos').textContent = qtd;
+                document.getElementById('mediaCusto').textContent = fmt.format(media);
+                
+                const tbody = document.getElementById('tabela');
+                if (data && data.length > 0) {
+                    tbody.innerHTML = data.map(c => `
+                        <tr>
+                            <td><strong>${c.descricao}</strong></td>
+                            <td><span class="badge badge-modern" style="background: ${c.categoria === 'FIXO' ? '#1e40af' : '#06b6d4'};">${c.categoria}</span></td>
+                            <td>${fmt.format(c.valorMensal)}</td>
+                            <td>${fmt.format(c.valorMensal * 12)}</td>
+                            <td>${c.recorrente ? '<span class="badge bg-success badge-modern">Sim</span>' : '<span class="badge bg-secondary badge-modern">Não</span>'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">Nenhum custo cadastrado</td></tr>';
+                }
+            } catch (e) { console.error(e); }
+        }
+        
+        async function salvar() {
+            const fd = new FormData(document.getElementById('form'));
+            const custo = {
+                descricao: fd.get('descricao'),
+                categoria: fd.get('categoria'),
+                valorMensal: parseFloat(fd.get('valorMensal')),
+                recorrente: document.getElementById('recorrente').checked
+            };
+            try {
+                await fetch('/api/meu-financeiro/custos', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(custo) 
+                });
+                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
+                document.getElementById('form').reset();
+                carregar();
+            } catch (e) { alert('Erro ao salvar!'); }
+        }
+        
+        document.addEventListener('DOMContentLoaded', carregar);
+    </script>
+    </th:block>
+</body>
+</html>

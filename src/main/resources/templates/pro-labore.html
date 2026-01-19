@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout}">
+<head>
+    <th:block th:fragment="titulo">Pró-labore - AESTRON</th:block>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <!-- Menu Horizontal do Meu Financeiro -->
+        <div th:replace="~{fragments/meu-financeiro-nav :: navbar('pro-labore')}"></div>
+        
+        <!-- Conteúdo Principal -->
+        <div class="mf-content mf-fade-in">
+            <!-- Info Box -->
+            <div class="alert alert-info" style="border-radius: 15px; border-left: 5px solid #1e40af;">
+                <h5><i class="bi bi-info-circle-fill"></i> O que é Pró-labore?</h5>
+                <p class="mb-0">É o <strong>seu salário como empresário MEI</strong>. Registre aqui suas retiradas mensais para controlar quanto você está tirando da empresa para uso pessoal.</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #0891b2 0%, #14b8a6 100%);">
+                        <h6>💰 Meu Salário Mensal</h6>
+                        <h2 id="valorMensal">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);">
+                        <h6>📅 Total Este Mês</h6>
+                        <h2 id="totalMesAtual">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);">
+                        <h6>📊 Total no Ano</h6>
+                        <h2 id="totalAnual">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #38bdf8 0%, #7dd3fc 100%);">
+                        <h6>💼 Retiradas Feitas</h6>
+                        <h2 id="qtdRetiradas">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-modern btn-primary-gradient" data-bs-toggle="modal" data-bs-target="#modal">
+                    <i class="bi bi-wallet2"></i> Registrar Meu Salário
+                </button>
+            </div>
+
+            <!-- Tabela -->
+            <div class="card-modern">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Histórico de Salários Retirados</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Mês Referência</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela">
+                            <tr><td colspan="4" class="text-center py-4">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modal">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 15px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #0891b2 0%, #14b8a6 100%); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title"><i class="bi bi-wallet2"></i> Registrar Meu Salário (Pró-labore)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-light" style="border-left: 4px solid #0891b2;">
+                        <small><i class="bi bi-lightbulb-fill text-warning"></i> <strong>Dica:</strong> O pró-labore é a retirada que você faz da sua empresa para seu uso pessoal, como um salário.</small>
+                    </div>
+                    <form id="form">
+                        <div class="mb-3">
+                            <label class="form-label"><i class="bi bi-calendar3"></i> Data da Retirada</label>
+                            <input type="date" class="form-control" name="data" required style="border-radius: 10px;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="bi bi-calendar-month"></i> Mês de Referência</label>
+                            <input type="month" class="form-control" name="mesReferencia" required style="border-radius: 10px;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="bi bi-cash"></i> Valor do Salário</label>
+                            <input type="number" step="0.01" class="form-control" name="valor" placeholder="Ex: 1500.00" required style="border-radius: 10px;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="bi bi-pencil"></i> Descrição (opcional)</label>
+                            <input type="text" class="form-control" name="descricao" placeholder="Ex: Salário Janeiro 2026" style="border-radius: 10px;">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-gradient btn-modern" onclick="salvar()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        async function carregar() {
+            try {
+                const res = await fetch('/api/meu-financeiro/pro-labore');
+                const data = await res.json();
+                
+                const now = new Date();
+                const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                
+                let valorMensal = 0, totalMesAtual = 0, totalAnual = 0;
+                (data || []).forEach(p => {
+                    totalAnual += p.valor;
+                    if (p.mesReferencia === mesAtual) {
+                        totalMesAtual += p.valor;
+                        valorMensal = p.valor;
+                    }
+                });
+                
+                document.getElementById('valorMensal').textContent = fmt.format(valorMensal);
+                document.getElementById('totalMesAtual').textContent = fmt.format(totalMesAtual);
+                document.getElementById('totalAnual').textContent = fmt.format(totalAnual);
+                document.getElementById('qtdRetiradas').textContent = data ? data.length : 0;
+                
+                const tbody = document.getElementById('tabela');
+                if (data && data.length > 0) {
+                    tbody.innerHTML = data.map(p => {
+                        const mesRef = p.mesReferencia.split('-');
+                        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                        const mesFormatado = `${meses[parseInt(mesRef[1])-1]}/${mesRef[0]}`;
+                        return `
+                        <tr>
+                            <td>${new Date(p.data).toLocaleDateString('pt-BR')}</td>
+                            <td><strong>${p.descricao || 'Salário ' + mesFormatado}</strong></td>
+                            <td class="text-success"><strong>${fmt.format(p.valor)}</strong></td>
+                            <td><span class="badge bg-primary">${mesFormatado}</span></td>
+                        </tr>
+                    `}).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><i class="bi bi-inbox"></i><br>Nenhum salário registrado ainda. Clique em "Registrar Meu Salário" para começar!</td></tr>';
+                }
+            } catch (e) { console.error(e); }
+        }
+        
+        async function salvar() {
+            const fd = new FormData(document.getElementById('form'));
+            const valor = parseFloat(fd.get('valor'));
+            
+            if (!valor || valor <= 0) {
+                alert('⚠️ Por favor, informe um valor válido para o salário!');
+                return;
+            }
+            
+            const prolabore = {
+                data: fd.get('data'),
+                descricao: fd.get('descricao') || `Salário ${fd.get('mesReferencia')}`,
+                valor: valor,
+                mesReferencia: fd.get('mesReferencia')
+            };
+            try {
+                await fetch('/api/meu-financeiro/pro-labore', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(prolabore) 
+                });
+                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
+                document.getElementById('form').reset();
+                carregar();
+                
+                // Mensagem de sucesso
+                const toast = document.createElement('div');
+                toast.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                toast.style = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                toast.innerHTML = `
+                    <i class="bi bi-check-circle-fill"></i> <strong>Salário registrado com sucesso!</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            } catch (e) { 
+                alert('❌ Erro ao registrar salário. Tente novamente!'); 
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', carregar);
+    </script>
+    </th:block>
+</body>
+</html>

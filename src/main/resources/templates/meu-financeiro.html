@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout}">
+<head>
+    <th:block th:fragment="titulo">Meu Financeiro - AESTRON</th:block>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-wallet2"></i> Meu Financeiro</h1>
+            <button class="btn btn-aestron" onclick="atualizarDashboard()">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar
+            </button>
+        </div>
+        
+        <!-- Alertas de Rotinas -->
+        <div id="alertas" class="mb-4"></div>
+        
+        <!-- Cards Principais -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card bg-primary text-white">
+                    <i class="bi bi-cash-stack" style="font-size: 48px; opacity: 0.3; position: absolute; top: 10px; right: 10px;"></i>
+                    <div class="stat-label">Saldo em Caixa</div>
+                    <div class="stat-value" id="saldoCaixa">R$ 0,00</div>
+                    <a th:href="@{/meu-financeiro/fluxo-caixa}" class="btn btn-sm btn-light mt-2">
+                        <i class="bi bi-arrow-right"></i> Acessar
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-success text-white">
+                    <i class="bi bi-graph-up-arrow" style="font-size: 48px; opacity: 0.3; position: absolute; top: 10px; right: 10px;"></i>
+                    <div class="stat-label">Total em Investimentos</div>
+                    <div class="stat-value" id="totalInvestimentos">R$ 0,00</div>
+                    <a th:href="@{/meu-financeiro/investimentos}" class="btn btn-sm btn-light mt-2">
+                        <i class="bi bi-arrow-right"></i> Acessar
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-info text-white">
+                    <i class="bi bi-piggy-bank" style="font-size: 48px; opacity: 0.3; position: absolute; top: 10px; right: 10px;"></i>
+                    <div class="stat-label">Total em Reservas</div>
+                    <div class="stat-value" id="totalReservas">R$ 0,00</div>
+                    <a th:href="@{/meu-financeiro/reservas}" class="btn btn-sm btn-light mt-2">
+                        <i class="bi bi-arrow-right"></i> Acessar
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-warning text-white">
+                    <i class="bi bi-calculator" style="font-size: 48px; opacity: 0.3; position: absolute; top: 10px; right: 10px;"></i>
+                    <div class="stat-label">Custos Mensais</div>
+                    <div class="stat-value" id="custosMensais">R$ 0,00</div>
+                    <a th:href="@{/meu-financeiro/custos-operacao}" class="btn btn-sm btn-light mt-2">
+                        <i class="bi bi-arrow-right"></i> Acessar
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Atalhos Rápidos -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-bank"></i> Controles Financeiros
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a th:href="@{/meu-financeiro/fluxo-caixa}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-arrow-left-right text-primary"></i> Fluxo de Caixa
+                        </a>
+                        <a th:href="@{/meu-financeiro/investimentos}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-graph-up text-success"></i> Investimentos
+                        </a>
+                        <a th:href="@{/meu-financeiro/custos-operacao}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-receipt text-warning"></i> Custos de Operação
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-piggy-bank"></i> Reservas e Pró-labore
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a th:href="@{/meu-financeiro/pro-labore}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-person-badge text-info"></i> Pró-labore (Meu Salário)
+                        </a>
+                        <a th:href="@{/meu-financeiro/reservas}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-safe text-success"></i> Reserva Segura
+                        </a>
+                        <a th:href="@{/meu-financeiro/reservas}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-wallet text-primary"></i> Reserva Pessoal
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-bell"></i> Rotinas e Lembretes
+                        <span id="badgeRotinas" class="badge bg-danger" style="display: none;">0</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="rotinasList"></div>
+                        <a th:href="@{/meu-financeiro/rotinas}" class="btn btn-sm btn-aestron w-100 mt-3">
+                            <i class="bi bi-calendar-check"></i> Gerenciar Rotinas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            async function atualizarDashboard() {
+                try {
+                    const response = await fetch('/api/meu-financeiro/dashboard');
+                    const data = await response.json();
+                    
+                    document.getElementById('saldoCaixa').textContent = formatarMoeda(data.saldoCaixa);
+                    document.getElementById('totalInvestimentos').textContent = formatarMoeda(data.totalInvestimentos);
+                    document.getElementById('totalReservas').textContent = formatarMoeda(data.totalReservas);
+                    document.getElementById('custosMensais').textContent = formatarMoeda(data.custosMensais);
+                    
+                    // Alertas
+                    let alertasHTML = '';
+                    if (data.rotinasAtrasadas > 0) {
+                        alertasHTML += `
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <strong>Atenção!</strong> Você tem ${data.rotinasAtrasadas} rotina(s) pendente(s) hoje!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `;
+                    }
+                    if (data.custosVencidos > 0) {
+                        alertasHTML += `
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                <strong>Urgente!</strong> Você tem ${data.custosVencidos} custo(s) vencido(s)!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `;
+                    }
+                    document.getElementById('alertas').innerHTML = alertasHTML;
+                    
+                    // Rotinas de hoje
+                    carregarRotinasHoje();
+                    
+                } catch (error) {
+                    console.error('Erro ao carregar dashboard:', error);
+                    exibirMensagem('danger', 'Erro ao carregar dados');
+                }
+            }
+            
+            async function carregarRotinasHoje() {
+                try {
+                    const response = await fetch('/api/meu-financeiro/rotinas/hoje');
+                    const rotinas = await response.json();
+                    
+                    const badge = document.getElementById('badgeRotinas');
+                    const lista = document.getElementById('rotinasList');
+                    
+                    if (rotinas.length > 0) {
+                        badge.textContent = rotinas.length;
+                        badge.style.display = 'inline';
+                        
+                        let html = '<div class="list-group">';
+                        rotinas.forEach(r => {
+                            html += `
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-bell text-warning"></i>
+                                            <small><strong>${r.titulo}</strong></small>
+                                        </div>
+                                        <button class="btn btn-sm btn-success" onclick="cumprirRotina(${r.id})">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        lista.innerHTML = html;
+                    } else {
+                        badge.style.display = 'none';
+                        lista.innerHTML = '<p class="text-muted text-center"><i class="bi bi-check-circle"></i> Nenhuma rotina pendente hoje!</p>';
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar rotinas:', error);
+                }
+            }
+            
+            async function cumprirRotina(id) {
+                try {
+                    await fetch(`/api/meu-financeiro/rotinas/${id}/cumprir`, { method: 'POST' });
+                    exibirMensagem('success', 'Rotina marcada como cumprida!');
+                    carregarRotinasHoje();
+                    atualizarDashboard();
+                } catch (error) {
+                    console.error('Erro ao cumprir rotina:', error);
+                    exibirMensagem('danger', 'Erro ao registrar cumprimento da rotina');
+                }
+            }
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                atualizarDashboard();
+            });
+        </script>
+    </th:block>
+</body>
+</html>

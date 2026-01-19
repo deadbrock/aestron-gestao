@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AESTRON - Gestão MEI</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    
+    <style>
+        :root {
+            --aestron-primary: #2c3e50;
+            --aestron-secondary: #3498db;
+            --aestron-success: #27ae60;
+            --aestron-warning: #f39c12;
+            --aestron-danger: #e74c3c;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding-top: 70px; /* Espaço para navbar fixa */
+            min-height: 100vh;
+        }
+        
+        /* Navbar Superior */
+        .navbar-aestron {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+        }
+        
+        .navbar-aestron .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .navbar-aestron .navbar-nav {
+            width: 100%;
+        }
+        
+        .navbar-aestron .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500;
+            padding: 1rem 1rem !important;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .navbar-aestron .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            border-bottom-color: rgba(255,255,255,0.5);
+        }
+        
+        .navbar-aestron .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            border-bottom-color: white;
+        }
+        
+        .navbar-aestron .dropdown-menu {
+            background: white;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            margin-top: 0;
+            padding: 0.5rem;
+            min-width: 250px;
+            display: none;
+            position: absolute;
+            z-index: 1050;
+        }
+        
+        .navbar-aestron .dropdown-menu.show {
+            display: block;
+        }
+        
+        /* Dropdown em hover para desktop */
+        @media (min-width: 992px) {
+            .navbar-aestron .dropdown:hover .dropdown-menu {
+                display: block;
+                margin-top: 0;
+            }
+        }
+        
+        .navbar-aestron .dropdown-item {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .navbar-aestron .dropdown-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .navbar-aestron .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: #e9ecef;
+        }
+        
+        .navbar-aestron .dropdown-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #667eea;
+            letter-spacing: 0.5px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .btn-logout {
+            background: rgba(231,76,60,0.2) !important;
+            color: white !important;
+            border: 2px solid rgba(231,76,60,0.5);
+            margin-left: 0.5rem;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(231,76,60,0.4) !important;
+            border-color: rgba(231,76,60,0.8);
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 600;
+            border: none;
+        }
+        
+        .stat-card {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .btn-aestron {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-aestron:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .badge-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.08);
+        }
+        
+        /* Responsivo */
+        @media (max-width: 991px) {
+            .navbar-aestron .nav-link {
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
+            
+            .navbar-aestron .nav-link:hover,
+            .navbar-aestron .nav-link.active {
+                border-left-color: white;
+            }
+            
+            .navbar-aestron .dropdown-menu {
+                background: rgba(255,255,255,0.95);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar Superior -->
+    <nav class="navbar navbar-expand-lg navbar-aestron">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-stars"></i> AESTRON
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" 
+                    aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation"
+                    style="border-color: rgba(255,255,255,0.3);">
+                <span class="navbar-toggler-icon" style="filter: brightness(0) invert(1);"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="nav-icon bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <!-- Financeiro -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="nav-icon bi bi-cash-stack"></i> Financeiro
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/receitas">
+                                <i class="bi bi-cash-coin"></i> Receitas
+                            </a></li>
+                            <li><a class="dropdown-item" href="/despesas">
+                                <i class="bi bi-wallet2"></i> Despesas
+                            </a></li>
+                            <li><a class="dropdown-item" href="/contas-pagar">
+                                <i class="bi bi-wallet"></i> Contas a Pagar
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/meu-financeiro">
+                                <i class="bi bi-piggy-bank-fill"></i> Meu Financeiro
+                            </a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Gestão -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="nav-icon bi bi-briefcase"></i> Gestão
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/clientes">
+                                <i class="bi bi-people-fill"></i> Clientes
+                            </a></li>
+                            <li><a class="dropdown-item" href="/fornecedores">
+                                <i class="bi bi-truck"></i> Fornecedores
+                            </a></li>
+                            <li><a class="dropdown-item" href="/estoque">
+                                <i class="bi bi-box-seam"></i> Estoque
+                            </a></li>
+                            <li><a class="dropdown-item" href="/portfolio">
+                                <i class="bi bi-briefcase"></i> Portfolio
+                            </a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Vendas -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="nav-icon bi bi-graph-up"></i> Vendas
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/leads">
+                                <i class="bi bi-person-plus"></i> Leads
+                            </a></li>
+                            <li><a class="dropdown-item" href="/campanhas">
+                                <i class="bi bi-megaphone"></i> Campanhas
+                            </a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Fiscal -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="nav-icon bi bi-file-earmark-text"></i> Fiscal
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/notas-fiscais">
+                                <i class="bi bi-file-earmark-text"></i> Notas Fiscais
+                            </a></li>
+                            <li><a class="dropdown-item" href="/obrigacoes-mei">
+                                <i class="bi bi-calendar-check"></i> Obrigações MEI
+                            </a></li>
+                            <li><a class="dropdown-item" href="/planejamento-tributario">
+                                <i class="bi bi-calculator"></i> Planejamento Tributário
+                            </a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Ferramentas -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="nav-icon bi bi-gear"></i> Ferramentas
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/contas-bancarias">
+                                <i class="bi bi-bank"></i> Contas Bancárias
+                            </a></li>
+                            <li><a class="dropdown-item" href="/metas-financeiras">
+                                <i class="bi bi-flag"></i> Metas Financeiras
+                            </a></li>
+                            <li><a class="dropdown-item" href="/alertas">
+                                <i class="bi bi-bell"></i> Alertas
+                            </a></li>
+                            <li><a class="dropdown-item" href="/calendario-financeiro">
+                                <i class="bi bi-calendar3"></i> Calendário
+                            </a></li>
+                            <li><a class="dropdown-item" href="/relatorios">
+                                <i class="bi bi-file-earmark-bar-graph"></i> Relatórios
+                            </a></li>
+                            <li><a class="dropdown-item" href="/educacao-financeira">
+                                <i class="bi bi-book"></i> Educação Financeira
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <!-- Botão Sair -->
+                <div class="d-flex">
+                    <a class="btn btn-logout" href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Menu Horizontal do Meu Financeiro -->
+        <div class="mf-navbar-horizontal">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div class="mf-navbar-brand">
+                    <i class="bi bi-piggy-bank-fill"></i> Meu Financeiro
+                </div>
+                
+                <nav class="mf-nav-links">
+                    <a href="/meu-financeiro" 
+                       class="mf-nav-link">
+                        <i class="bi bi-grid"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/fluxo-caixa" 
+                       class="mf-nav-link active">
+                        <i class="bi bi-arrow-left-right"></i>
+                        <span>Fluxo de Caixa</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/investimentos" 
+                       class="mf-nav-link">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Investimentos</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/custos-operacao" 
+                       class="mf-nav-link">
+                        <i class="bi bi-receipt"></i>
+                        <span>Custos</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/pro-labore" 
+                       class="mf-nav-link">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Pró-labore</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/reservas" 
+                       class="mf-nav-link">
+                        <i class="bi bi-safe"></i>
+                        <span>Reservas</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/rotinas" 
+                       class="mf-nav-link">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Rotinas</span>
+                    </a>
+                </nav>
+                
+                <a href="/" class="mf-back-btn">
+                    <i class="bi bi-arrow-left"></i> Menu Principal
+                </a>
+            </div>
+        </div>
+    </div>
+        
+        <!-- Conteúdo Principal -->
+        <div class="mf-content mf-fade-in">
+            <div class="mf-page-header">
+                <h2><i class="bi bi-arrow-left-right"></i> Fluxo de Caixa</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="/meu-financeiro">Meu Financeiro</a></li>
+                        <li class="breadcrumb-item active">Fluxo de Caixa</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h6>💰 Saldo Atual</h6>
+                        <h2 id="saldoAtual">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        <h6>📈 Entradas (Mês)</h6>
+                        <h2 id="entradasMes">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h6>📉 Saídas (Mês)</h6>
+                        <h2 id="saidasMes">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <h6>📊 Saldo do Mês</h6>
+                        <h2 id="saldoMes">R$ 0,00</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-modern btn-primary-gradient" data-bs-toggle="modal" data-bs-target="#modal">
+                    <i class="bi bi-plus-circle-fill"></i> Nova Movimentação
+                </button>
+            </div>
+
+            <!-- Tabela -->
+            <div class="card-modern">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Movimentações</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Tipo</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela">
+                            <tr><td colspan="4" class="text-center py-4">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+    <div class="modal fade" id="modal">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 15px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle-fill"></i> Nova Movimentação</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form">
+                        <div class="mb-3"><input type="date" class="form-control" name="data" required style="border-radius: 10px;"></div>
+                        <div class="mb-3"><input type="text" class="form-control" name="descricao" placeholder="Descrição" required style="border-radius: 10px;"></div>
+                        <div class="mb-3">
+                            <select class="form-select" name="tipo" required style="border-radius: 10px;">
+                                <option value="ENTRADA">💰 Entrada</option>
+                                <option value="SAIDA">💸 Saída</option>
+                            </select>
+                        </div>
+                        <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valor" placeholder="Valor" required style="border-radius: 10px;"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-gradient btn-modern" onclick="salvar()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        async function carregar() {
+            try {
+                const res = await fetch('/api/meu-financeiro/fluxo-caixa');
+                const data = await res.json();
+                document.getElementById('saldoAtual').textContent = fmt.format(data.saldoAtual || 0);
+                document.getElementById('entradasMes').textContent = fmt.format(data.entradasMes || 0);
+                document.getElementById('saidasMes').textContent = fmt.format(data.saidasMes || 0);
+                document.getElementById('saldoMes').textContent = fmt.format((data.entradasMes || 0) - (data.saidasMes || 0));
+                
+                const tbody = document.getElementById('tabela');
+                if (data.movimentacoes && data.movimentacoes.length > 0) {
+                    tbody.innerHTML = data.movimentacoes.map(m => `
+                        <tr>
+                            <td>${new Date(m.data).toLocaleDateString('pt-BR')}</td>
+                            <td>${m.descricao}</td>
+                            <td><span class="badge bg-${m.tipo === 'ENTRADA' ? 'success' : 'danger'} badge-modern">${m.tipo}</span></td>
+                            <td class="text-${m.tipo === 'ENTRADA' ? 'success' : 'danger'}"><strong>${fmt.format(m.valor)}</strong></td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">Nenhuma movimentação</td></tr>';
+                }
+            } catch (e) { console.error(e); }
+        }
+        
+        async function salvar() {
+            const fd = new FormData(document.getElementById('form'));
+            const mov = { data: fd.get('data'), descricao: fd.get('descricao'), tipo: fd.get('tipo'), valor: parseFloat(fd.get('valor')) };
+            try {
+                await fetch('/api/meu-financeiro/fluxo-caixa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(mov) });
+                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
+                document.getElementById('form').reset();
+                carregar();
+            } catch (e) { alert('Erro!'); }
+        }
+        
+        document.addEventListener('DOMContentLoaded', carregar);
+    </script>
+    
+    </main>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery (opcional, mas útil) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <script>
+        // Verificar se Bootstrap está carregado e inicializar dropdowns
+        console.log('Bootstrap carregado:', typeof bootstrap !== 'undefined');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap não está carregado!');
+                return;
+            }
+            
+            // Habilitar todos os dropdowns manualmente
+            var dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+            console.log('Encontrados', dropdownElementList.length, 'dropdowns');
+            
+            dropdownElementList.forEach(function(dropdownToggle) {
+                // Adicionar eventos de click manualmente
+                dropdownToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    var dropdown = this.parentElement;
+                    var menu = dropdown.querySelector('.dropdown-menu');
+                    
+                    // Fechar outros dropdowns abertos
+                    document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
+                        if (openMenu !== menu) {
+                            openMenu.classList.remove('show');
+                            openMenu.parentElement.querySelector('.dropdown-toggle').setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                    
+                    // Toggle do dropdown atual
+                    if (menu.classList.contains('show')) {
+                        menu.classList.remove('show');
+                        this.setAttribute('aria-expanded', 'false');
+                    } else {
+                        menu.classList.add('show');
+                        this.setAttribute('aria-expanded', 'true');
+                    }
+                });
+            });
+            
+            // Fechar dropdown ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+                        menu.classList.remove('show');
+                        menu.parentElement.querySelector('.dropdown-toggle').setAttribute('aria-expanded', 'false');
+                    });
+                }
+            });
+            
+            console.log('Dropdowns configurados com sucesso!');
+        });
+        
+        // Funções auxiliares globais
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+        
+        function formatarData(data) {
+            return new Date(data).toLocaleDateString('pt-BR');
+        }
+        
+        function exibirMensagem(tipo, mensagem) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                ${mensagem}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const mainContent = document.querySelector('.main-content');
+            mainContent.insertBefore(alertDiv, mainContent.firstChild);
+            
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+    </script>
+</body>
+</html>
+

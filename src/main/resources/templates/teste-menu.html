@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Menu - AESTRON</title>
+<link rel="stylesheet" href="/css/meu-financeiro-nav.css">
+    <link rel="stylesheet" href="/css/style-profissional.css">
+</head>
+<body>
+    <div class="mf-container">
+        <!-- Menu Lateral -->
+        <div class="mf-sidebar">
+            <div class="mf-sidebar-header">
+                <h5><i class="bi bi-piggy-bank-fill"></i> Meu Financeiro</h5>
+                <a href="/" class="mf-back-btn">
+                    <i class="bi bi-arrow-left"></i> Voltar ao Menu Principal
+                </a>
+            </div>
+            
+            <div class="mf-nav-group">
+                <div class="mf-nav-group-title">Controles Financeiros</div>
+                <a href="/meu-financeiro/fluxo-caixa" class="mf-nav-item active">
+                    <i class="bi bi-arrow-left-right"></i>
+                    <span>Fluxo de Caixa</span>
+                </a>
+                <a href="/meu-financeiro/investimentos" class="mf-nav-item">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Investimentos</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Conteúdo -->
+        <div class="mf-content mf-fade-in">
+            <div class="mf-page-header">
+                <h2><i class="bi bi-check-circle text-success"></i> TESTE DO MENU LATERAL</h2>
+                <p class="lead">Se você está vendo este menu lateral roxo à esquerda, significa que o CSS foi carregado corretamente!</p>
+            </div>
+
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> Sucesso!</h4>
+                <p>O menu lateral está funcionando! Agora você pode:</p>
+                <hr>
+                <ul>
+                    <li>Clicar em <strong>"Fluxo de Caixa"</strong> no menu lateral</li>
+                    <li>Clicar em <strong>"Voltar ao Menu Principal"</strong> para voltar</li>
+                </ul>
+            </div>
+
+            <div class="card-modern">
+                <div class="card-body">
+                    <h5>Informações do Teste:</h5>
+                    <ul>
+                        <li><strong>URL atual:</strong> /teste-menu</li>
+                        <li><strong>CSS carregado:</strong> meu-financeiro-nav.css</li>
+                        <li><strong>Layout:</strong> HTML standalone (sem Thymeleaf fragments)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </th:block>
+</body>
+</html>

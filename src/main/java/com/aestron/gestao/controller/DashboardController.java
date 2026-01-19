@@ -33,4 +33,12 @@ public class DashboardController {
     public ResponseEntity<Map<String, Object>> obterDashboardComercial() {
         return ResponseEntity.ok(dashboardService.obterDashboardComercial());
     }
+    
+    @GetMapping("/historico-financeiro")
+    public ResponseEntity<Map<String, Object>> obterHistoricoFinanceiro(
+            @RequestParam(defaultValue = "6") int meses) {
+        // Limitar entre 3 e 12 meses
+        meses = Math.max(3, Math.min(12, meses));
+        return ResponseEntity.ok(dashboardService.obterHistoricoFinanceiro(meses));
+    }
 }

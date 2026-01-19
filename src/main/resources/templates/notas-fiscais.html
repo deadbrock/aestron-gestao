@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout}">
+<head>
+    <th:block th:fragment="titulo">Notas Fiscais - AESTRON</th:block>
+</head>
+<body>
+    <th:block th:fragment="content">
+
+    <div class="container-fluid p-4 fade-in">
+        <nav aria-label="breadcrumb" class="breadcrumb-modern">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/"><i class="bi bi-house-door-fill"></i> Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="javascript:history.back()"><i class="bi bi-file-earmark-fill"></i> Fiscal</a></li>
+                <li class="breadcrumb-item active"><i class="bi bi-file-earmark-text-fill"></i> Notas Fiscais</li>
+            </ol>
+        </nav>
+
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap">
+            <h2><i class="bi bi-file-earmark-text-fill"></i> Notas Fiscais</h2>
+            <button class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#modal">
+                <i class="bi bi-plus-circle-fill"></i> Emitir Nota
+            </button>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="stat-card-pro" style="background: linear-gradient(135deg, #0891b2 0%, #14b8a6 100%);">
+                    <h6>💰 Total (Mês)</h6>
+                    <h2 id="total">R$ 0,00</h2>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="stat-card-pro" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);">
+                    <h6>📄 Notas (Mês)</h6>
+                    <h2 id="qtd">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-modern">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Notas Emitidas</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-modern mb-0">
+                    <thead>
+                        <tr><th>Número</th><th>Cliente</th><th>Data</th><th>Valor</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="tabela">
+                        <tr><td colspan="5" class="text-center py-4">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 15px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title"><i class="bi bi-file-earmark-text-fill"></i> Emitir Nota</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form">
+                        <div class="mb-3"><input type="text" class="form-control" name="numero" placeholder="Número" required style="border-radius: 10px;"></div>
+                        <div class="mb-3"><input type="text" class="form-control" name="nomeCliente" placeholder="Cliente" required style="border-radius: 10px;"></div>
+                        <div class="mb-3"><input type="text" class="form-control" name="cpfCnpjCliente" placeholder="CPF/CNPJ" required style="border-radius: 10px;"></div>
+                        <div class="mb-3"><input type="date" class="form-control" name="dataEmissao" required style="border-radius: 10px;"></div>
+                        <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valorTotal" placeholder="Valor" required style="border-radius: 10px;"></div>
+                        <div class="mb-3"><textarea class="form-control" name="descricao" placeholder="Descrição" rows="2" required style="border-radius: 10px;"></textarea></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-gradient btn-modern" onclick="salvar()">Emitir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        async function carregar() {
+            try {
+                const res = await fetch('/api/gestao/notas-fiscais');
+                const notas = await res.json();
+                const hoje = new Date();
+                const doMes = notas.filter(n => {
+                    const d = new Date(n.dataEmissao);
+                    return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
+                });
+                document.getElementById('qtd').textContent = doMes.length;
+                document.getElementById('total').textContent = fmt.format(doMes.reduce((s, n) => s + n.valorTotal, 0));
+                const tbody = document.getElementById('tabela');
+                if (notas.length > 0) {
+                    tbody.innerHTML = notas.map(n => `<tr>
+                        <td>${n.numero}</td>
+                        <td>${n.nomeCliente}</td>
+                        <td>${new Date(n.dataEmissao).toLocaleDateString('pt-BR')}</td>
+                        <td>${fmt.format(n.valorTotal)}</td>
+                        <td><span class="badge bg-success badge-modern">${n.status}</span></td>
+                    </tr>`).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">Nenhuma nota emitida</td></tr>';
+                }
+            } catch (e) { console.error(e); }
+        }
+        async function salvar() {
+            const fd = new FormData(document.getElementById('form'));
+            const nota = { numero: fd.get('numero'), serie: '1', nomeCliente: fd.get('nomeCliente'), cpfCnpjCliente: fd.get('cpfCnpjCliente'), descricao: fd.get('descricao'), valorTotal: parseFloat(fd.get('valorTotal')), dataEmissao: fd.get('dataEmissao'), status: 'EMITIDA' };
+            try {
+                await fetch('/api/gestao/notas-fiscais', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nota) });
+                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
+                document.getElementById('form').reset();
+                carregar();
+            } catch (e) { alert('Erro!'); }
+        }
+        document.addEventListener('DOMContentLoaded', carregar);
+    </script>
+</body>
+</html>
+
+    </th:block>
+</body>
+</html>

@@ -20,16 +20,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/**").permitAll()  // APIs públicas para facilitar desenvolvimento
-                .requestMatchers("/h2-console/**").permitAll()  // Console H2
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
-                .anyRequest().permitAll()  // Temporariamente público para desenvolvimento
-            )
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**", "/h2-console/**")  // Desabilitar CSRF para APIs
-            )
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())  // Permitir H2 Console
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/login").permitAll()  // Recursos públicos
+                .anyRequest().authenticated()  // Demais requisições precisam autenticação
             )
             .formLogin(form -> form
                 .loginPage("/login")
@@ -37,8 +29,15 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutSuccessUrl("/login")
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll()
+            )
+            .csrf(csrf -> csrf.disable())  // CSRF desabilitado para simplificar
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.disable())  // Permitir frames para H2 Console
             );
         
         return http.build();
@@ -46,13 +45,17 @@ public class SecurityConfig {
     
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails admin = User.builder()
-            .username("admin")
-            .password(passwordEncoder().encode("admin123"))
+        // Usa variáveis de ambiente em produção, valores padrão em desenvolvimento
+        String username = System.getenv().getOrDefault("ADMIN_USERNAME", "admin");
+        String password = System.getenv().getOrDefault("ADMIN_PASSWORD", "admin");
+        
+        UserDetails user = User.builder()
+            .username(username)
+            .password(passwordEncoder().encode(password))
             .roles("ADMIN")
             .build();
-        
-        return new InMemoryUserDetailsManager(admin);
+            
+        return new InMemoryUserDetailsManager(user);
     }
     
     @Bean

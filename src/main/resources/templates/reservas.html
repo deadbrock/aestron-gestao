@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout}">
+<head>
+    <th:block th:fragment="titulo">Reservas Financeiras - AESTRON</th:block>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <!-- Menu Horizontal do Meu Financeiro -->
+        <div th:replace="~{fragments/meu-financeiro-nav :: navbar('reservas')}"></div>
+        
+        <!-- Conteúdo Principal -->
+        <div class="mf-content mf-fade-in">
+            <!-- Stats -->
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #0891b2 0%, #14b8a6 100%);">
+                        <h6>💰 Total em Reservas</h6>
+                        <h2 id="totalReservas">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);">
+                        <h6>🎯 Meta Total</h6>
+                        <h2 id="metaTotal">R$ 0,00</h2>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="stat-card-pro" style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);">
+                        <h6>📊 Progresso Geral</h6>
+                        <h2 id="progressoGeral">0%</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-modern btn-primary-gradient" data-bs-toggle="modal" data-bs-target="#modal">
+                    <i class="bi bi-plus-circle-fill"></i> Nova Reserva
+                </button>
+            </div>
+
+            <!-- Cards de Reservas -->
+            <div id="reservas" class="row"></div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modal">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 15px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle-fill"></i> Nova Reserva</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form">
+                        <div class="mb-3"><input type="text" class="form-control" name="nome" placeholder="Nome da Reserva" required style="border-radius: 10px;"></div>
+                        <div class="mb-3">
+                            <select class="form-select" name="tipo" required style="border-radius: 10px;">
+                                <option value="SEGURA">🏦 Reserva Segura (Empresa)</option>
+                                <option value="PESSOAL">💰 Reserva Pessoal</option>
+                                <option value="EMERGENCIA">🚨 Reserva de Emergência</option>
+                            </select>
+                        </div>
+                        <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valorAtual" placeholder="Valor Atual" required style="border-radius: 10px;"></div>
+                        <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valorMeta" placeholder="Valor Meta" required style="border-radius: 10px;"></div>
+                        <div class="mb-3"><textarea class="form-control" name="descricao" placeholder="Descrição/Objetivo" rows="3" style="border-radius: 10px;"></textarea></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-gradient btn-modern" onclick="salvar()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        async function carregar() {
+            try {
+                const res = await fetch('/api/meu-financeiro/reservas');
+                const data = await res.json();
+                
+                let totalReservas = 0, metaTotal = 0;
+                (data || []).forEach(r => { totalReservas += r.valorAtual; metaTotal += r.valorMeta; });
+                const progressoGeral = metaTotal > 0 ? ((totalReservas / metaTotal) * 100) : 0;
+                
+                document.getElementById('totalReservas').textContent = fmt.format(totalReservas);
+                document.getElementById('metaTotal').textContent = fmt.format(metaTotal);
+                document.getElementById('progressoGeral').textContent = progressoGeral.toFixed(1) + '%';
+                
+                const container = document.getElementById('reservas');
+                if (data && data.length > 0) {
+                    container.innerHTML = data.map(r => {
+                        const progresso = r.valorMeta > 0 ? ((r.valorAtual / r.valorMeta) * 100) : 0;
+                        const icon = r.tipo === 'SEGURA' ? '🏦' : r.tipo === 'PESSOAL' ? '💰' : '🚨';
+                        const cor = progresso >= 100 ? '#14b8a6' : progresso >= 50 ? '#38bdf8' : '#06b6d4';
+                        return `
+                            <div class="col-md-6 mb-4">
+                                <div class="card-modern">
+                                    <div class="card-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white;">
+                                        <h5 class="mb-0">${icon} ${r.nome}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3">${r.descricao || 'Sem descrição'}</p>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span><strong>Valor Atual:</strong></span>
+                                            <span class="text-success"><strong>${fmt.format(r.valorAtual)}</strong></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span><strong>Meta:</strong></span>
+                                            <span class="text-primary"><strong>${fmt.format(r.valorMeta)}</strong></span>
+                                        </div>
+                                        <div class="progress" style="height: 25px; border-radius: 15px;">
+                                            <div class="progress-bar" style="width: ${progresso}%; background: ${cor}; font-weight: 600;" role="progressbar">
+                                                ${progresso.toFixed(1)}%
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-2">
+                                            <small class="text-muted">Faltam ${fmt.format(Math.max(0, r.valorMeta - r.valorAtual))}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<div class="col-12"><div class="card-modern"><div class="card-body text-center py-5 text-muted">Nenhuma reserva cadastrada</div></div></div>';
+                }
+            } catch (e) { console.error(e); }
+        }
+        
+        async function salvar() {
+            const fd = new FormData(document.getElementById('form'));
+            const reserva = {
+                nome: fd.get('nome'),
+                tipo: fd.get('tipo'),
+                valorAtual: parseFloat(fd.get('valorAtual')),
+                valorMeta: parseFloat(fd.get('valorMeta')),
+                descricao: fd.get('descricao')
+            };
+            try {
+                await fetch('/api/meu-financeiro/reservas', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(reserva) 
+                });
+                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
+                document.getElementById('form').reset();
+                carregar();
+            } catch (e) { alert('Erro ao salvar!'); }
+        }
+        
+        document.addEventListener('DOMContentLoaded', carregar);
+    </script>
+    </th:block>
+</body>
+</html>

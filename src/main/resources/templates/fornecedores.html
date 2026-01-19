@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout}">
+<head>
+    <th:block th:fragment="titulo">Fornecedores - AESTRON</th:block>
+</head>
+<body>
+    <th:block th:fragment="content">
+
+    <!-- Navbar -->
+    <div class="container-fluid p-4">
+        <!-- Breadcrumb Profissional -->
+        <nav aria-label="breadcrumb" class="breadcrumb-modern">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/"><i class="bi bi-house-door"></i> Dashboard</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="javascript:history.back()"><i class="bi bi-briefcase"></i> Gestão</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    <i class="bi bi-truck"></i> Fornecedores
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Header Elegante -->
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <h2><i class="bi bi-truck"></i> Cadastro de Fornecedores</h2>
+            <button class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#modalNovoFornecedor" style="box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <i class="bi bi-plus-circle"></i> Novo Fornecedor
+            </button>
+        </div>
+
+        <!-- Lista de Fornecedores -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                <h5 class="mb-0">📋 Lista de Fornecedores</h5>
+                <input type="text" class="form-control w-25" placeholder="Buscar fornecedor..." id="buscaFornecedor">
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Razão Social</th>
+                                <th>CNPJ</th>
+                                <th>Email</th>
+                                <th>Telefone</th>
+                                <th>Categoria</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaFornecedores">
+                            <tr>
+                                <td colspan="7" class="text-center">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo Fornecedor -->
+    <div class="modal fade" id="modalNovoFornecedor" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Fornecedor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNovoFornecedor">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Razão Social *</label>
+                                <input type="text" class="form-control" name="razaoSocial" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nome Fantasia</label>
+                                <input type="text" class="form-control" name="nomeFantasia">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CNPJ *</label>
+                                <input type="text" class="form-control" name="cnpj" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Telefone</label>
+                                <input type="text" class="form-control" name="telefone">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Categoria</label>
+                                <input type="text" class="form-control" name="categoria" placeholder="Ex: Materiais, Serviços">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Endereço</label>
+                                <textarea class="form-control" name="endereco" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Observações</label>
+                                <textarea class="form-control" name="observacoes" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarFornecedor()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function carregarFornecedores() {
+            try {
+                const response = await fetch('/api/gestao/fornecedores');
+                const fornecedores = await response.json();
+                
+                const tbody = document.getElementById('tabelaFornecedores');
+                if (fornecedores.length > 0) {
+                    tbody.innerHTML = fornecedores.map(f => `
+                        <tr>
+                            <td><strong>${f.razaoSocial}</strong><br><small class="text-muted">${f.nomeFantasia || '-'}</small></td>
+                            <td>${f.cnpj}</td>
+                            <td>${f.email}</td>
+                            <td>${f.telefone || '-'}</td>
+                            <td><span class="badge bg-secondary">${f.categoria || 'Geral'}</span></td>
+                            <td>
+                                ${f.ativo ? 
+                                    '<span class="badge bg-success">Ativo</span>' : 
+                                    '<span class="badge bg-secondary">Inativo</span>'}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum fornecedor cadastrado</td></tr>';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar fornecedores:', error);
+            }
+        }
+
+        async function salvarFornecedor() {
+            const form = document.getElementById('formNovoFornecedor');
+            const formData = new FormData(form);
+            
+            const fornecedor = {
+                razaoSocial: formData.get('razaoSocial'),
+                nomeFantasia: formData.get('nomeFantasia'),
+                cnpj: formData.get('cnpj'),
+                email: formData.get('email'),
+                telefone: formData.get('telefone'),
+                categoria: formData.get('categoria'),
+                endereco: formData.get('endereco'),
+                observacoes: formData.get('observacoes'),
+                ativo: true
+            };
+            
+            try {
+                const response = await fetch('/api/gestao/fornecedores', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fornecedor)
+                });
+                
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalNovoFornecedor')).hide();
+                    form.reset();
+                    carregarFornecedores();
+                    alert('Fornecedor cadastrado com sucesso!');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar fornecedor:', error);
+                alert('Erro ao salvar fornecedor!');
+            }
+        }
+
+        document.getElementById('buscaFornecedor').addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            const linhas = document.querySelectorAll('#tabelaFornecedores tr');
+            linhas.forEach(linha => {
+                const texto = linha.textContent.toLowerCase();
+                linha.style.display = texto.includes(termo) ? '' : 'none';
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', carregarFornecedores);
+    </script>
+</body>
+</html>
+
+    </th:block>
+</body>
+</html>

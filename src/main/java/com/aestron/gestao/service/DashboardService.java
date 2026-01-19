@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +41,7 @@ public class DashboardService {
         // Limite MEI
         BigDecimal limiteMEI = new BigDecimal("81000.00");
         dashboard.put("limiteMEI", limiteMEI);
-        dashboard.put("percentualLimite", receitaAnual.divide(limiteMEI, 4, BigDecimal.ROUND_HALF_UP)
+        dashboard.put("percentualLimite", receitaAnual.divide(limiteMEI, 4, RoundingMode.HALF_UP)
                                                       .multiply(new BigDecimal("100")));
         
         // Obrigações
@@ -61,7 +63,58 @@ public class DashboardService {
         // Portfolio
         dashboard.put("produtosAtivos", portfolioService.listarAtivos().size());
         
+        // Dados históricos limitados (últimos 6 meses)
+        dashboard.put("historicoFinanceiro", obterHistoricoFinanceiro(6));
+        
         return dashboard;
+    }
+    
+    /**
+     * Retorna histórico financeiro dos últimos N meses
+     * @param meses número de meses a retornar (máximo 12)
+     * @return Map com labels e dados para gráfico
+     */
+    public Map<String, Object> obterHistoricoFinanceiro(int meses) {
+        // Limitar a no máximo 12 meses
+        meses = Math.min(meses, 12);
+        
+        LocalDate hoje = LocalDate.now();
+        LocalDate dataInicio = hoje.minusMonths(meses - 1).withDayOfMonth(1);
+        LocalDate dataFim = hoje.withDayOfMonth(hoje.lengthOfMonth());
+        
+        Map<String, Object> historico = new HashMap<>();
+        List<String> labels = new ArrayList<>();
+        List<BigDecimal> receitas = new ArrayList<>();
+        List<BigDecimal> despesas = new ArrayList<>();
+        List<BigDecimal> lucros = new ArrayList<>();
+        
+        YearMonth mesAtual = YearMonth.from(dataInicio);
+        YearMonth mesFinal = YearMonth.from(dataFim);
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM/yyyy", new Locale("pt", "BR"));
+        
+        while (!mesAtual.isAfter(mesFinal)) {
+            LocalDate inicioMes = mesAtual.atDay(1);
+            LocalDate fimMes = mesAtual.atEndOfMonth();
+            
+            BigDecimal receitaMes = receitaService.calcularTotalRecebido(inicioMes, fimMes);
+            BigDecimal despesaMes = despesaService.calcularTotalPago(inicioMes, fimMes);
+            BigDecimal lucroMes = receitaMes.subtract(despesaMes);
+            
+            labels.add(mesAtual.format(formatter));
+            receitas.add(receitaMes);
+            despesas.add(despesaMes);
+            lucros.add(lucroMes);
+            
+            mesAtual = mesAtual.plusMonths(1);
+        }
+        
+        historico.put("labels", labels);
+        historico.put("receitas", receitas);
+        historico.put("despesas", despesas);
+        historico.put("lucros", lucros);
+        
+        return historico;
     }
     
     public Map<String, Object> obterDashboardFinanceiro(LocalDate inicio, LocalDate fim) {

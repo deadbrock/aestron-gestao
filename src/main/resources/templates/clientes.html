@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout}">
+<head>
+    <th:block th:fragment="titulo">Clientes - AESTRON</th:block>
+</head>
+<body>
+    <th:block th:fragment="content">
+
+    <div class="container-fluid p-4 fade-in">
+        <!-- Breadcrumb Profissional -->
+        <nav aria-label="breadcrumb" class="breadcrumb-modern">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/"><i class="bi bi-house-door-fill"></i> Dashboard</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="javascript:history.back()"><i class="bi bi-briefcase-fill"></i> Gestão</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    <i class="bi bi-people-fill"></i> Clientes
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Header Elegante -->
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap">
+            <h2><i class="bi bi-people-fill"></i> Cadastro de Clientes</h2>
+            <button class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#modalNovoCliente">
+                <i class="bi bi-plus-circle-fill"></i> Novo Cliente
+            </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stat-card-pro" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);">
+                    <h6>👥 Total de Clientes</h6>
+                    <h2 id="totalClientes">0</h2>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stat-card-pro" style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);">
+                    <h6>✅ Clientes Ativos</h6>
+                    <h2 id="clientesAtivos">0</h2>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stat-card-pro" style="background: linear-gradient(135deg, #38bdf8 0%, #7dd3fc 100%);">
+                    <h6>📧 Com Email</h6>
+                    <h2 id="clientesComEmail">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card com Tabela -->
+        <div class="card-modern">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Lista de Clientes</h5>
+                <input type="text" class="form-control w-auto" placeholder="🔍 Buscar..." id="buscaCliente" style="border-radius: 20px;">
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Telefone</th>
+                                <th>CPF/CNPJ</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaClientes">
+                            <tr><td colspan="6" class="text-center py-4">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalNovoCliente" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 15px; border: none;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title"><i class="bi bi-person-plus-fill"></i> Novo Cliente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNovoCliente">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nome Completo *</label>
+                                <input type="text" class="form-control" name="nome" required style="border-radius: 10px;">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Email *</label>
+                                <input type="email" class="form-control" name="email" required style="border-radius: 10px;">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Telefone</label>
+                                <input type="text" class="form-control" name="telefone" style="border-radius: 10px;">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">CPF/CNPJ</label>
+                                <input type="text" class="form-control" name="cpfCnpj" style="border-radius: 10px;">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-gradient btn-modern" onclick="salvarCliente()">
+                        <i class="bi bi-check-circle-fill"></i> Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function carregarClientes() {
+            try {
+                const response = await fetch('/api/gestao/clientes');
+                const clientes = await response.json();
+                
+                document.getElementById('totalClientes').textContent = clientes.length;
+                document.getElementById('clientesAtivos').textContent = clientes.filter(c => c.ativo).length;
+                document.getElementById('clientesComEmail').textContent = clientes.filter(c => c.email).length;
+                
+                const tbody = document.getElementById('tabelaClientes');
+                if (clientes.length > 0) {
+                    tbody.innerHTML = clientes.map(cliente => `
+                        <tr>
+                            <td><strong>${cliente.nome}</strong></td>
+                            <td>${cliente.email || '-'}</td>
+                            <td>${cliente.telefone || '-'}</td>
+                            <td>${cliente.cpfCnpj || '-'}</td>
+                            <td>${cliente.ativo ? '<span class="badge bg-success badge-modern">Ativo</span>' : '<span class="badge bg-secondary badge-modern">Inativo</span>'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" style="border-radius: 8px;">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Nenhum cliente cadastrado</td></tr>';
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        async function salvarCliente() {
+            const form = document.getElementById('formNovoCliente');
+            const formData = new FormData(form);
+            
+            const cliente = {
+                nome: formData.get('nome'),
+                email: formData.get('email'),
+                telefone: formData.get('telefone'),
+                cpfCnpj: formData.get('cpfCnpj'),
+                ativo: true
+            };
+            
+            try {
+                await fetch('/api/gestao/clientes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cliente)
+                });
+                
+                bootstrap.Modal.getInstance(document.getElementById('modalNovoCliente')).hide();
+                form.reset();
+                carregarClientes();
+                
+                // Mostrar toast de sucesso
+                const toast = document.createElement('div');
+                toast.className = 'position-fixed top-0 end-0 p-3';
+                toast.style.zIndex = '9999';
+                toast.innerHTML = `
+                    <div class="toast show" role="alert">
+                        <div class="toast-header bg-success text-white">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong class="me-auto">Sucesso!</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">Cliente cadastrado com sucesso!</div>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            } catch (error) {
+                alert('Erro ao salvar!');
+            }
+        }
+
+        document.getElementById('buscaCliente').addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            const linhas = document.querySelectorAll('#tabelaClientes tr');
+            linhas.forEach(linha => {
+                const texto = linha.textContent.toLowerCase();
+                linha.style.display = texto.includes(termo) ? '' : 'none';
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', carregarClientes);
+    </script>
+</body>
+</html>
+
+    </th:block>
+</body>
+</html>

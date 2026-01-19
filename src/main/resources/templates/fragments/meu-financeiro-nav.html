@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:fragment="head">
+        <link rel="stylesheet" href="/css/style-profissional.css">
+        <link rel="stylesheet" href="/css/meu-financeiro-nav.css">
+    </th:block>
+</head>
+<body>
+    <!-- Menu Horizontal do Meu Financeiro -->
+    <div th:fragment="navbar(activePage)" class="mf-navbar-horizontal">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div class="mf-navbar-brand">
+                    <i class="bi bi-piggy-bank-fill"></i> Meu Financeiro
+                </div>
+                
+                <nav class="mf-nav-links">
+                    <a href="/meu-financeiro" 
+                       class="mf-nav-link" 
+                       th:classappend="${activePage == 'dashboard' ? 'active' : ''}">
+                        <i class="bi bi-grid"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/fluxo-caixa" 
+                       class="mf-nav-link" 
+                       th:classappend="${activePage == 'fluxo-caixa' ? 'active' : ''}">
+                        <i class="bi bi-arrow-left-right"></i>
+                        <span>Fluxo de Caixa</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/investimentos" 
+                       class="mf-nav-link"
+                       th:classappend="${activePage == 'investimentos' ? 'active' : ''}">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Investimentos</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/custos-operacao" 
+                       class="mf-nav-link"
+                       th:classappend="${activePage == 'custos' ? 'active' : ''}">
+                        <i class="bi bi-receipt"></i>
+                        <span>Custos</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/pro-labore" 
+                       class="mf-nav-link"
+                       th:classappend="${activePage == 'pro-labore' ? 'active' : ''}">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Pró-labore</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/reservas" 
+                       class="mf-nav-link"
+                       th:classappend="${activePage == 'reservas' ? 'active' : ''}">
+                        <i class="bi bi-safe"></i>
+                        <span>Reservas</span>
+                    </a>
+                    
+                    <a href="/meu-financeiro/rotinas" 
+                       class="mf-nav-link"
+                       th:classappend="${activePage == 'rotinas' ? 'active' : ''}">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Rotinas</span>
+                    </a>
+                </nav>
+                
+                <a href="/" class="mf-back-btn">
+                    <i class="bi bi-arrow-left"></i> Menu Principal
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

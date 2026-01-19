@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR" th:replace="~{layout :: layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AESTRON - Gestão MEI</title>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <!-- Hero Section - Informações da Empresa -->
+        <div class="hero-section mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="bi bi-stars text-primary"></i> AESTRON
+                    </h1>
+                    <p class="lead mb-3">Sistema Inteligente de Gestão para MEI</p>
+                    <p class="text-muted mb-4">
+                        <strong>Fundada por Douglas Marques</strong> - Especialista em Software e Tecnologia<br>
+                        A AESTRON oferece soluções completas de gestão empresarial, 
+                        com foco em microempreendedores individuais. Controle financeiro, 
+                        gestão de clientes, obrigações fiscais e muito mais em um só lugar.
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a th:href="@{/dashboard}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-speedometer2"></i> Dashboard Completo
+                        </a>
+                        <a th:href="@{/receitas}" class="btn btn-success btn-lg">
+                            <i class="bi bi-cash-coin"></i> Nova Receita
+                        </a>
+                        <a th:href="@{/meu-financeiro}" class="btn btn-info btn-lg">
+                            <i class="bi bi-piggy-bank-fill"></i> Meu Financeiro
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="company-logo">
+                        <i class="bi bi-stars" style="font-size: 150px; color: #1e40af;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo Financeiro Rápido -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3"><i class="bi bi-graph-up"></i> Resumo Financeiro</h3>
+            </div>
+        </div>
+
+        <!-- Cards de Resumo - Hoje -->
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <h5 class="text-muted"><i class="bi bi-calendar-day"></i> Hoje</h5>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card" style="border-left: 4px solid #28a745;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1">Receitas do Dia</p>
+                                <h4 class="mb-0 text-success" id="receitasDia">R$ 0,00</h4>
+                                <small class="text-muted" id="receitasDiaQtd">0 transações</small>
+                            </div>
+                            <i class="bi bi-arrow-up-circle text-success" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card" style="border-left: 4px solid #dc3545;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1">Despesas do Dia</p>
+                                <h4 class="mb-0 text-danger" id="despesasDia">R$ 0,00</h4>
+                                <small class="text-muted" id="despesasDiaQtd">0 transações</small>
+                            </div>
+                            <i class="bi bi-arrow-down-circle text-danger" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card" style="border-left: 4px solid #007bff;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1">Saldo do Dia</p>
+                                <h4 class="mb-0 text-primary" id="saldoDia">R$ 0,00</h4>
+                                <small class="text-muted">Receitas - Despesas</small>
+                            </div>
+                            <i class="bi bi-wallet2 text-primary" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card" style="border-left: 4px solid #ffc107;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1">Meta do Dia</p>
+                                <h4 class="mb-0 text-warning" id="metaDia">R$ 2.700,00</h4>
+                                <small class="text-muted" id="progressoDia">0%</small>
+                            </div>
+                            <i class="bi bi-bullseye text-warning" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards de Resumo - Mês -->
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <h5 class="text-muted"><i class="bi bi-calendar-month"></i> Mensal</h5>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card" style="border-left: 4px solid #28a745;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1">Receitas do Mês</p>
+                                <h4 class="mb-0 text-success" id="receitasMes">R$ 0,00</h4>
+                                <small class="text-muted" id="receitasMesQtd">0 recebimentos</small>
+                            </div>
+                            <i class="bi bi-cash-stack text-success" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card" style="border-left: 4px solid #dc3545;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1">Despesas do Mês</p>
+                                <h4 class="mb-0 text-danger" id="despesasMes">R$ 0,00</h4>
+                                <small class="text-muted" id="despesasMesQtd">0 pagamentos</small>
+                            </div>
+                            <i class="bi bi-credit-card text-danger" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card" style="border-left: 4px solid #007bff;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1">Lucro do Mês</p>
+                                <h4 class="mb-0 text-primary" id="lucroMes">R$ 0,00</h4>
+                                <small class="text-muted" id="margemMes">Margem: 0%</small>
+                            </div>
+                            <i class="bi bi-graph-up-arrow text-primary" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card" style="border-left: 4px solid #17a2b8;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1">Receita Anual</p>
+                                <h4 class="mb-0 text-info" id="receitaAnual">R$ 0,00</h4>
+                                <small class="text-muted" id="limiteMEI">Limite MEI: 0%</small>
+                            </div>
+                            <i class="bi bi-calendar-year text-info" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acesso Rápido aos Módulos -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3"><i class="bi bi-grid"></i> Acesso Rápido</h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Financeiro -->
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a th:href="@{/receitas}" class="card text-decoration-none hover-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                    <div class="card-body text-center">
+                        <i class="bi bi-cash-coin" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <h5>Receitas</h5>
+                        <p class="mb-0 small">Gerenciar receitas</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a th:href="@{/despesas}" class="card text-decoration-none hover-card" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white;">
+                    <div class="card-body text-center">
+                        <i class="bi bi-wallet2" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <h5>Despesas</h5>
+                        <p class="mb-0 small">Controlar despesas</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a th:href="@{/clientes}" class="card text-decoration-none hover-card" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <h5>Clientes</h5>
+                        <p class="mb-0 small">Gestão de clientes</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a th:href="@{/leads}" class="card text-decoration-none hover-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white;">
+                    <div class="card-body text-center">
+                        <i class="bi bi-person-plus" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <h5>Leads</h5>
+                        <p class="mb-0 small">CRM e Vendas</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a th:href="@{/obrigacoes-mei}" class="card text-decoration-none hover-card" style="background: linear-gradient(135deg, #6f42c1 0%, #563d7c 100%); color: white;">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-check" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <h5>Obrigações MEI</h5>
+                        <p class="mb-0 small">DAS e DASN-SIMEI</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a th:href="@{/meu-financeiro}" class="card text-decoration-none hover-card" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white;">
+                    <div class="card-body text-center">
+                        <i class="bi bi-piggy-bank-fill" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <h5>Meu Financeiro</h5>
+                        <p class="mb-0 small">Gestão pessoal</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a th:href="@{/relatorios}" class="card text-decoration-none hover-card" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white;">
+                    <div class="card-body text-center">
+                        <i class="bi bi-file-earmark-bar-graph" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <h5>Relatórios</h5>
+                        <p class="mb-0 small">Análises detalhadas</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a th:href="@{/dashboard}" class="card text-decoration-none hover-card" style="background: linear-gradient(135deg, #343a40 0%, #23272b 100%); color: white;">
+                    <div class="card-body text-center">
+                        <i class="bi bi-speedometer2" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <h5>Dashboard</h5>
+                        <p class="mb-0 small">Visão completa</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <style>
+            .hero-section {
+                background: white;
+                padding: 3rem 2rem;
+                border-radius: 20px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+
+            .hover-card {
+                transition: all 0.3s;
+                cursor: pointer;
+            }
+
+            .hover-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            }
+        </style>
+
+        <script>
+            // Carregar dados financeiros
+            async function carregarResumo() {
+                try {
+                    const response = await fetch('/api/dashboard/resumo');
+                    const data = await response.json();
+                    
+                    const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+                    
+                    // Dados do dia
+                    document.getElementById('receitasDia').textContent = fmt.format(data.receitasDia || 0);
+                    document.getElementById('receitasDiaQtd').textContent = (data.receitasDiaQtd || 0) + ' transações';
+                    document.getElementById('despesasDia').textContent = fmt.format(data.despesasDia || 0);
+                    document.getElementById('despesasDiaQtd').textContent = (data.despesasDiaQtd || 0) + ' transações';
+                    document.getElementById('saldoDia').textContent = fmt.format((data.receitasDia || 0) - (data.despesasDia || 0));
+                    
+                    // Meta do dia (R$ 81.000 / 30 dias = R$ 2.700/dia)
+                    const metaDiaria = 2700;
+                    const progressoDia = data.receitasDia > 0 ? (data.receitasDia / metaDiaria * 100).toFixed(1) : 0;
+                    document.getElementById('progressoDia').textContent = progressoDia + '% da meta';
+                    
+                    // Dados do mês
+                    document.getElementById('receitasMes').textContent = fmt.format(data.receitaMensal || 0);
+                    document.getElementById('receitasMesQtd').textContent = (data.receitasQtd || 0) + ' recebimentos';
+                    document.getElementById('despesasMes').textContent = fmt.format(data.despesaMensal || 0);
+                    document.getElementById('despesasMesQtd').textContent = (data.despesasQtd || 0) + ' pagamentos';
+                    
+                    const lucro = (data.receitaMensal || 0) - (data.despesaMensal || 0);
+                    const margem = data.receitaMensal > 0 ? (lucro / data.receitaMensal * 100).toFixed(1) : 0;
+                    document.getElementById('lucroMes').textContent = fmt.format(lucro);
+                    document.getElementById('margemMes').textContent = 'Margem: ' + margem + '%';
+                    
+                    // Receita anual
+                    document.getElementById('receitaAnual').textContent = fmt.format(data.receitaAnual || 0);
+                    const limiteMEI = (data.receitaAnual || 0) / 81000 * 100;
+                    document.getElementById('limiteMEI').textContent = 'Limite MEI: ' + limiteMEI.toFixed(1) + '%';
+                    
+                } catch (error) {
+                    console.error('Erro ao carregar resumo:', error);
+                }
+            }
+            
+            // Carregar ao iniciar
+            document.addEventListener('DOMContentLoaded', carregarResumo);
+        </script>
+    </th:block>
+</body>
+</html>
