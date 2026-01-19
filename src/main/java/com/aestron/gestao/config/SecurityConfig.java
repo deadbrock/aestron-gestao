@@ -1,5 +1,7 @@
 package com.aestron.gestao.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,11 +18,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
     
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/login").permitAll()  // Recursos públicos
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/login", "/favicon.ico").permitAll()  // Recursos públicos
                 .anyRequest().authenticated()  // Demais requisições precisam autenticação
             )
             .formLogin(form -> form
@@ -38,6 +42,15 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())  // CSRF desabilitado para simplificar
             .headers(headers -> headers
                 .frameOptions(frame -> frame.disable())  // Permitir frames para H2 Console
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .maxAgeInSeconds(31536000)  // 1 ano
+                )
+            )
+            // Forçar HTTPS em produção (Railway)
+            .requiresChannel(channel -> channel
+                .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
+                .requiresSecure()
             );
         
         return http.build();
@@ -48,6 +61,13 @@ public class SecurityConfig {
         // Usa variáveis de ambiente em produção, valores padrão em desenvolvimento
         String username = System.getenv().getOrDefault("ADMIN_USERNAME", "admin");
         String password = System.getenv().getOrDefault("ADMIN_PASSWORD", "admin");
+        
+        log.info("========================================");
+        log.info("🔐 CONFIGURAÇÃO DE LOGIN:");
+        log.info("   Usuário configurado: {}", username);
+        log.info("   Senha configurada: {} caracteres", password.length());
+        log.info("   Use estas credenciais para login!");
+        log.info("========================================");
         
         UserDetails user = User.builder()
             .username(username)
