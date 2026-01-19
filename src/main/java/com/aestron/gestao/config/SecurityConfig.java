@@ -42,15 +42,6 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())  // CSRF desabilitado para simplificar
             .headers(headers -> headers
                 .frameOptions(frame -> frame.disable())  // Permitir frames para H2 Console
-                .httpStrictTransportSecurity(hsts -> hsts
-                    .includeSubDomains(true)
-                    .maxAgeInSeconds(31536000)  // 1 ano
-                )
-            )
-            // Forçar HTTPS em produção (Railway)
-            .requiresChannel(channel -> channel
-                .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
-                .requiresSecure()
             );
         
         return http.build();
