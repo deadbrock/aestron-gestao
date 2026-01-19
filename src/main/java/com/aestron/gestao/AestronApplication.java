@@ -9,7 +9,17 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class AestronApplication {
     
     public static void main(String[] args) {
+        // Debug: Verificar variável PORT
+        String port = System.getenv("PORT");
+        String serverPort = System.getProperty("server.port", "não definido");
+        System.out.println("\n=================================================");
+        System.out.println("🔍 DEBUG - Variáveis de Ambiente:");
+        System.out.println("   PORT (env): " + (port != null ? port : "NÃO DEFINIDA"));
+        System.out.println("   server.port (property): " + serverPort);
+        System.out.println("=================================================\n");
+        
         SpringApplication.run(AestronApplication.class, args);
+        
         System.out.println("\n=================================================");
         System.out.println("🚀 AESTRON - Sistema de Gestão MEI");
         System.out.println("=================================================");
