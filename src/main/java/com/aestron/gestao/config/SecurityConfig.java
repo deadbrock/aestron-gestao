@@ -24,7 +24,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/login", "/favicon.ico").permitAll()  // Recursos públicos
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/login", "/favicon.ico", "/health", "/actuator/health").permitAll()  // Recursos públicos
                 .anyRequest().authenticated()  // Demais requisições precisam autenticação
             )
             .formLogin(form -> form
@@ -59,8 +59,11 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         // Usa variáveis de ambiente em produção, valores padrão em desenvolvimento
-        String username = System.getenv().getOrDefault("ADMIN_USERNAME", "admin");
-        String password = System.getenv().getOrDefault("ADMIN_PASSWORD", "admin");
+        // Suporta tanto ADMIN_* quanto LOGIN_* para compatibilidade
+        String username = System.getenv().getOrDefault("LOGIN_USERNAME", 
+                          System.getenv().getOrDefault("ADMIN_USERNAME", "admin"));
+        String password = System.getenv().getOrDefault("LOGIN_PASSWORD", 
+                          System.getenv().getOrDefault("ADMIN_PASSWORD", "admin"));
         
         log.info("========================================");
         log.info("🔐 CONFIGURAÇÃO DE LOGIN:");
