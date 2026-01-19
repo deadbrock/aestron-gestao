@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 import javax.sql.DataSource;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @Configuration
 @Profile("prod")
@@ -17,17 +19,39 @@ public class DatabaseConfig {
     public DataSource dataSource() {
         String databaseUrl = System.getenv("DATABASE_URL");
         
-        if (databaseUrl != null && databaseUrl.startsWith("postgres://")) {
-            // Converter URL do Railway/Heroku para formato JDBC
-            databaseUrl = databaseUrl.replace("postgres://", "jdbc:postgresql://");
-        } else if (databaseUrl != null && databaseUrl.startsWith("postgresql://")) {
-            // Converter URL do Railway para formato JDBC
-            databaseUrl = "jdbc:" + databaseUrl;
+        if (databaseUrl == null) {
+            throw new IllegalStateException("DATABASE_URL não configurado!");
         }
         
-        return DataSourceBuilder
-                .create()
-                .url(databaseUrl)
-                .build();
+        try {
+            // Parse da URL do Railway: postgresql://user:password@host:port/database
+            URI dbUri = new URI(databaseUrl);
+            
+            String username = null;
+            String password = null;
+            
+            // Extrair username e password
+            if (dbUri.getUserInfo() != null) {
+                String[] credentials = dbUri.getUserInfo().split(":");
+                username = credentials[0];
+                password = credentials.length > 1 ? credentials[1] : null;
+            }
+            
+            // Construir URL JDBC sem credenciais (formato correto)
+            String jdbcUrl = "jdbc:postgresql://" + 
+                           dbUri.getHost() + ":" + 
+                           dbUri.getPort() + 
+                           dbUri.getPath();
+            
+            return DataSourceBuilder
+                    .create()
+                    .url(jdbcUrl)
+                    .username(username)
+                    .password(password)
+                    .build();
+                    
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("DATABASE_URL inválido: " + databaseUrl, e);
+        }
     }
 }
