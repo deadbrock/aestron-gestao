@@ -34,7 +34,7 @@
 
             <!-- Ações -->
             <div class="d-flex justify-content-end mb-3">
-                <button class="btn btn-modern btn-primary-gradient" data-bs-toggle="modal" data-bs-target="#modal">
+                <button class="btn btn-modern btn-primary-gradient" data-bs-toggle="modal" data-bs-target="#modalNovaReserva">
                     <i class="bi bi-plus-circle-fill"></i> Nova Reserva
                 </button>
             </div>
@@ -43,45 +43,223 @@
             <div id="reservas" class="row"></div>
         </div>
 
-        <!-- Modal -->
-        <div class="modal fade" id="modal">
-        <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 15px;">
-                <div class="modal-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title"><i class="bi bi-plus-circle-fill"></i> Nova Reserva</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="form">
-                        <div class="mb-3"><input type="text" class="form-control" name="nome" placeholder="Nome da Reserva" required style="border-radius: 10px;"></div>
-                        <div class="mb-3">
-                            <select class="form-select" name="tipo" required style="border-radius: 10px;">
-                                <option value="SEGURA">🏦 Reserva Segura (Empresa)</option>
-                                <option value="PESSOAL">💰 Reserva Pessoal</option>
-                                <option value="EMERGENCIA">🚨 Reserva de Emergência</option>
-                            </select>
-                        </div>
-                        <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valorAtual" placeholder="Valor Atual" required style="border-radius: 10px;"></div>
-                        <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valorMeta" placeholder="Valor Meta" required style="border-radius: 10px;"></div>
-                        <div class="mb-3"><textarea class="form-control" name="descricao" placeholder="Descrição/Objetivo" rows="3" style="border-radius: 10px;"></textarea></div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary-gradient btn-modern" onclick="salvar()">Salvar</button>
+        <!-- Modal Nova Reserva -->
+        <div class="modal fade" id="modalNovaReserva">
+            <div class="modal-dialog">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title"><i class="bi bi-plus-circle-fill"></i> Nova Reserva</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formNovaReserva">
+                            <div class="mb-3"><input type="text" class="form-control" name="nome" placeholder="Nome da Reserva" required style="border-radius: 10px;"></div>
+                            <div class="mb-3">
+                                <select class="form-select" name="tipo" required style="border-radius: 10px;">
+                                    <option value="SEGURA">🏦 Reserva Segura (Empresa)</option>
+                                    <option value="PESSOAL">💰 Reserva Pessoal</option>
+                                    <option value="EMERGENCIA">🚨 Reserva de Emergência</option>
+                                    <option value="INVESTIMENTO">📈 Para Investimento</option>
+                                    <option value="OBJETIVO">🎯 Objetivo Específico</option>
+                                </select>
+                            </div>
+                            <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valorAtual" placeholder="Valor Inicial" required style="border-radius: 10px;"></div>
+                            <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valorMeta" placeholder="Valor Meta (opcional)" style="border-radius: 10px;"></div>
+                            <div class="mb-3"><textarea class="form-control" name="descricao" placeholder="Descrição/Objetivo" rows="3" style="border-radius: 10px;"></textarea></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary-gradient btn-modern" onclick="salvarNovaReserva()">Salvar</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Modal Editar Reserva -->
+        <div class="modal fade" id="modalEditarReserva">
+            <div class="modal-dialog">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title"><i class="bi bi-pencil-fill"></i> Editar Reserva</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formEditarReserva">
+                            <input type="hidden" name="id" id="editId">
+                            <div class="mb-3"><input type="text" class="form-control" name="nome" id="editNome" placeholder="Nome da Reserva" required style="border-radius: 10px;"></div>
+                            <div class="mb-3">
+                                <select class="form-select" name="tipo" id="editTipo" required style="border-radius: 10px;">
+                                    <option value="SEGURA">🏦 Reserva Segura (Empresa)</option>
+                                    <option value="PESSOAL">💰 Reserva Pessoal</option>
+                                    <option value="EMERGENCIA">🚨 Reserva de Emergência</option>
+                                    <option value="INVESTIMENTO">📈 Para Investimento</option>
+                                    <option value="OBJETIVO">🎯 Objetivo Específico</option>
+                                </select>
+                            </div>
+                            <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valorMeta" id="editMeta" placeholder="Valor Meta" style="border-radius: 10px;"></div>
+                            <div class="mb-3"><textarea class="form-control" name="descricao" id="editDescricao" placeholder="Descrição/Objetivo" rows="3" style="border-radius: 10px;"></textarea></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary-gradient btn-modern" onclick="salvarEdicao()">Salvar Alterações</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Saque Emergencial -->
+        <div class="modal fade" id="modalSaqueEmergencial">
+            <div class="modal-dialog">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Saque Emergencial</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formSaqueEmergencial">
+                            <input type="hidden" name="reservaId" id="saqueEmergencialId">
+                            <div class="mb-3">
+                                <label class="form-label">Saldo Disponível: <strong id="saldoDisponivelEmergencial">R$ 0,00</strong></label>
+                            </div>
+                            <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valor" placeholder="Valor do Saque" required style="border-radius: 10px;"></div>
+                            <div class="mb-3"><textarea class="form-control" name="observacao" placeholder="Motivo do saque emergencial" rows="3" style="border-radius: 10px;"></textarea></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-warning btn-modern" onclick="confirmarSaqueEmergencial()">Confirmar Saque</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Saque Total -->
+        <div class="modal fade" id="modalSaqueTotal">
+            <div class="modal-dialog">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title"><i class="bi bi-cash-coin"></i> Saque Total</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formSaqueTotal">
+                            <input type="hidden" name="reservaId" id="saqueTotalId">
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Você está prestes a sacar todo o valor da reserva: <strong id="valorTotalSaque">R$ 0,00</strong>
+                            </div>
+                            <div class="mb-3"><textarea class="form-control" name="observacao" placeholder="Motivo do saque total" rows="3" style="border-radius: 10px;"></textarea></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger btn-modern" onclick="confirmarSaqueTotal()">Confirmar Saque Total</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Transferir Reserva -->
+        <div class="modal fade" id="modalTransferirReserva">
+            <div class="modal-dialog">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title"><i class="bi bi-arrow-left-right"></i> Transferir entre Reservas</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formTransferirReserva">
+                            <input type="hidden" name="origemId" id="transferirOrigemId">
+                            <div class="mb-3">
+                                <label class="form-label">De: <strong id="transferirOrigemNome">-</strong></label>
+                                <label class="form-label float-end">Saldo: <strong id="transferirOrigemSaldo">R$ 0,00</strong></label>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Para:</label>
+                                <select class="form-select" name="destinoId" id="transferirDestinoId" required style="border-radius: 10px;">
+                                    <option value="">Selecione a reserva destino...</option>
+                                </select>
+                            </div>
+                            <div class="mb-3"><input type="number" step="0.01" class="form-control" name="valor" placeholder="Valor a transferir" required style="border-radius: 10px;"></div>
+                            <div class="mb-3"><textarea class="form-control" name="observacao" placeholder="Observação (opcional)" rows="2" style="border-radius: 10px;"></textarea></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary-gradient btn-modern" onclick="confirmarTransferencia()">Transferir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Mudar Tipo -->
+        <div class="modal fade" id="modalMudarTipo">
+            <div class="modal-dialog">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title"><i class="bi bi-arrow-repeat"></i> Mudar Tipo de Reserva</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formMudarTipo">
+                            <input type="hidden" name="reservaId" id="mudarTipoId">
+                            <div class="mb-3">
+                                <label class="form-label">Reserva: <strong id="mudarTipoNome">-</strong></label>
+                                <label class="form-label float-end">Tipo Atual: <strong id="mudarTipoAtual">-</strong></label>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Novo Tipo:</label>
+                                <select class="form-select" name="tipo" id="mudarTipoNovo" required style="border-radius: 10px;">
+                                    <option value="SEGURA">🏦 Reserva Segura (Empresa)</option>
+                                    <option value="PESSOAL">💰 Reserva Pessoal</option>
+                                    <option value="EMERGENCIA">🚨 Reserva de Emergência</option>
+                                    <option value="INVESTIMENTO">📈 Para Investimento</option>
+                                    <option value="OBJETIVO">🎯 Objetivo Específico</option>
+                                </select>
+                            </div>
+                            <div class="mb-3"><textarea class="form-control" name="observacao" placeholder="Motivo da mudança (opcional)" rows="2" style="border-radius: 10px;"></textarea></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary-gradient btn-modern" onclick="confirmarMudancaTipo()">Confirmar Mudança</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Histórico -->
+        <div class="modal fade" id="modalHistorico">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title"><i class="bi bi-clock-history"></i> Histórico de Movimentações</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="historicoConteudo">
+                            <p class="text-center text-muted">Carregando histórico...</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-modern" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <script>
+        let reservasLista = [];
+        
         async function carregar() {
             try {
                 const res = await fetch('/api/meu-financeiro/reservas');
                 const data = await res.json();
+                reservasLista = data || [];
                 
                 let totalReservas = 0, metaTotal = 0;
-                (data || []).forEach(r => { 
+                reservasLista.forEach(r => { 
                     const saldo = r.saldoAtual || 0;
                     const meta = r.metaValor || 0;
                     totalReservas += saldo; 
@@ -94,18 +272,26 @@
                 document.getElementById('progressoGeral').textContent = progressoGeral.toFixed(1) + '%';
                 
                 const container = document.getElementById('reservas');
-                if (data && data.length > 0) {
-                    container.innerHTML = data.map(r => {
+                if (reservasLista.length > 0) {
+                    container.innerHTML = reservasLista.map(r => {
                         const saldo = r.saldoAtual || 0;
                         const meta = r.metaValor || 0;
                         const progresso = meta > 0 ? ((saldo / meta) * 100) : 0;
-                        const icon = r.tipo === 'SEGURA' ? '🏦' : r.tipo === 'PESSOAL' ? '💰' : '🚨';
+                        const icon = r.tipo === 'SEGURA' ? '🏦' : r.tipo === 'PESSOAL' ? '💰' : r.tipo === 'EMERGENCIA' ? '🚨' : r.tipo === 'INVESTIMENTO' ? '📈' : '🎯';
                         const cor = progresso >= 100 ? '#14b8a6' : progresso >= 50 ? '#38bdf8' : '#06b6d4';
                         return `
                             <div class="col-md-6 mb-4">
                                 <div class="card-modern">
-                                    <div class="card-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white;">
+                                    <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white;">
                                         <h5 class="mb-0">${icon} ${r.nome}</h5>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-light btn-sm" onclick="editarReserva(${r.id})" title="Editar">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </button>
+                                            <button class="btn btn-light btn-sm" onclick="verHistorico(${r.id})" title="Histórico">
+                                                <i class="bi bi-clock-history"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="card-body">
                                         <p class="text-muted mb-3">${r.descricao || 'Sem descrição'}</p>
@@ -115,15 +301,43 @@
                                         </div>
                                         <div class="d-flex justify-content-between mb-3">
                                             <span><strong>Meta:</strong></span>
-                                            <span class="text-primary"><strong>${formatarMoeda(meta)}</strong></span>
+                                            <span class="text-primary"><strong>${meta > 0 ? formatarMoeda(meta) : 'Sem meta'}</strong></span>
                                         </div>
-                                        <div class="progress" style="height: 25px; border-radius: 15px;">
+                                        ${meta > 0 ? `
+                                        <div class="progress mb-2" style="height: 25px; border-radius: 15px;">
                                             <div class="progress-bar" style="width: ${progresso}%; background: ${cor}; font-weight: 600;" role="progressbar">
                                                 ${progresso.toFixed(1)}%
                                             </div>
                                         </div>
-                                        <div class="text-center mt-2">
+                                        <div class="text-center mb-3">
                                             <small class="text-muted">Faltam ${formatarMoeda(Math.max(0, meta - saldo))}</small>
+                                        </div>
+                                        ` : ''}
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-sm btn-success" onclick="adicionarValor(${r.id})">
+                                                <i class="bi bi-plus-circle"></i> Adicionar Valor
+                                            </button>
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-sm btn-warning" onclick="abrirSaqueEmergencial(${r.id}, ${saldo})">
+                                                    <i class="bi bi-exclamation-triangle"></i> Saque Emergencial
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="abrirSaqueTotal(${r.id}, ${saldo})">
+                                                    <i class="bi bi-cash-coin"></i> Saque Total
+                                                </button>
+                                            </div>
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-sm btn-info" onclick="abrirTransferir(${r.id})">
+                                                    <i class="bi bi-arrow-left-right"></i> Transferir
+                                                </button>
+                                                <button class="btn btn-sm btn-secondary" onclick="abrirMudarTipo(${r.id})">
+                                                    <i class="bi bi-arrow-repeat"></i> Mudar Tipo
+                                                </button>
+                                            </div>
+                                            ${meta > 0 ? `
+                                            <button class="btn btn-sm btn-outline-danger" onclick="excluirMeta(${r.id})">
+                                                <i class="bi bi-x-circle"></i> Excluir Meta
+                                            </button>
+                                            ` : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -136,32 +350,315 @@
             } catch (e) { console.error(e); }
         }
         
-        async function salvar() {
-            // Verificar se salvarComSeguranca está disponível
+        async function salvarNovaReserva() {
             if (typeof salvarComSeguranca === 'undefined') {
-                console.error('salvarComSeguranca não está disponível. Verifique se app-utils.js foi carregado.');
                 alert('Erro: Função de salvamento não disponível. Recarregue a página.');
                 return;
             }
             
-            const fd = new FormData(document.getElementById('form'));
+            const fd = new FormData(document.getElementById('formNovaReserva'));
             const reserva = {
                 nome: fd.get('nome'),
                 tipo: fd.get('tipo'),
                 saldoAtual: parseFloat(fd.get('valorAtual') || 0),
-                metaValor: parseFloat(fd.get('valorMeta') || 0),
+                metaValor: fd.get('valorMeta') ? parseFloat(fd.get('valorMeta')) : null,
                 descricao: fd.get('descricao')
             };
             await salvarComSeguranca('/api/meu-financeiro/reservas', reserva, {
-                modalId: 'modal',
-                formId: 'form',
+                modalId: 'modalNovaReserva',
+                formId: 'formNovaReserva',
                 callbackSucesso: carregar,
                 mensagemSucesso: 'Reserva cadastrada com sucesso!',
                 mensagemErro: 'Erro ao salvar reserva. Verifique os dados e tente novamente.'
             });
         }
         
-        // Aguardar carregamento completo antes de executar
+        function editarReserva(id) {
+            const reserva = reservasLista.find(r => r.id === id);
+            if (!reserva) return;
+            
+            document.getElementById('editId').value = reserva.id;
+            document.getElementById('editNome').value = reserva.nome;
+            document.getElementById('editTipo').value = reserva.tipo;
+            document.getElementById('editMeta').value = reserva.metaValor || '';
+            document.getElementById('editDescricao').value = reserva.descricao || '';
+            
+            new bootstrap.Modal(document.getElementById('modalEditarReserva')).show();
+        }
+        
+        async function salvarEdicao() {
+            const fd = new FormData(document.getElementById('formEditarReserva'));
+            const id = fd.get('id');
+            const reserva = {
+                nome: fd.get('nome'),
+                tipo: fd.get('tipo'),
+                metaValor: fd.get('valorMeta') ? parseFloat(fd.get('valorMeta')) : null,
+                descricao: fd.get('descricao')
+            };
+            
+            try {
+                const response = await fetch(`/api/meu-financeiro/reservas/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reserva)
+                });
+                
+                if (!response.ok) throw new Error('Erro ao atualizar');
+                
+                bootstrap.Modal.getInstance(document.getElementById('modalEditarReserva')).hide();
+                exibirMensagem('success', 'Reserva atualizada com sucesso!');
+                await carregar();
+            } catch (e) {
+                exibirMensagem('danger', 'Erro ao atualizar reserva');
+            }
+        }
+        
+        function abrirSaqueEmergencial(id, saldo) {
+            document.getElementById('saqueEmergencialId').value = id;
+            document.getElementById('saldoDisponivelEmergencial').textContent = formatarMoeda(saldo);
+            document.getElementById('formSaqueEmergencial').reset();
+            document.getElementById('saqueEmergencialId').value = id;
+            new bootstrap.Modal(document.getElementById('modalSaqueEmergencial')).show();
+        }
+        
+        async function confirmarSaqueEmergencial() {
+            const fd = new FormData(document.getElementById('formSaqueEmergencial'));
+            const id = fd.get('reservaId');
+            const valor = parseFloat(fd.get('valor'));
+            const observacao = fd.get('observacao');
+            
+            try {
+                const response = await fetch(`/api/meu-financeiro/reservas/${id}/saque-emergencial`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ valor, observacao })
+                });
+                
+                if (!response.ok) throw new Error('Erro ao realizar saque');
+                
+                bootstrap.Modal.getInstance(document.getElementById('modalSaqueEmergencial')).hide();
+                exibirMensagem('success', 'Saque emergencial realizado com sucesso!');
+                await carregar();
+            } catch (e) {
+                exibirMensagem('danger', e.message || 'Erro ao realizar saque emergencial');
+            }
+        }
+        
+        function abrirSaqueTotal(id, saldo) {
+            document.getElementById('saqueTotalId').value = id;
+            document.getElementById('valorTotalSaque').textContent = formatarMoeda(saldo);
+            document.getElementById('formSaqueTotal').reset();
+            document.getElementById('saqueTotalId').value = id;
+            new bootstrap.Modal(document.getElementById('modalSaqueTotal')).show();
+        }
+        
+        async function confirmarSaqueTotal() {
+            const fd = new FormData(document.getElementById('formSaqueTotal'));
+            const id = fd.get('reservaId');
+            const observacao = fd.get('observacao');
+            
+            if (!confirm('Tem certeza que deseja sacar todo o valor da reserva?')) return;
+            
+            try {
+                const response = await fetch(`/api/meu-financeiro/reservas/${id}/saque-total`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ observacao })
+                });
+                
+                if (!response.ok) throw new Error('Erro ao realizar saque');
+                
+                bootstrap.Modal.getInstance(document.getElementById('modalSaqueTotal')).hide();
+                exibirMensagem('success', 'Saque total realizado com sucesso!');
+                await carregar();
+            } catch (e) {
+                exibirMensagem('danger', e.message || 'Erro ao realizar saque total');
+            }
+        }
+        
+        function abrirTransferir(id) {
+            const reserva = reservasLista.find(r => r.id === id);
+            if (!reserva) return;
+            
+            document.getElementById('transferirOrigemId').value = id;
+            document.getElementById('transferirOrigemNome').textContent = reserva.nome;
+            document.getElementById('transferirOrigemSaldo').textContent = formatarMoeda(reserva.saldoAtual || 0);
+            
+            const select = document.getElementById('transferirDestinoId');
+            select.innerHTML = '<option value="">Selecione a reserva destino...</option>';
+            reservasLista.filter(r => r.id !== id && r.ativa).forEach(r => {
+                const option = document.createElement('option');
+                option.value = r.id;
+                option.textContent = `${r.nome} (${formatarMoeda(r.saldoAtual || 0)})`;
+                select.appendChild(option);
+            });
+            
+            document.getElementById('formTransferirReserva').reset();
+            document.getElementById('transferirOrigemId').value = id;
+            new bootstrap.Modal(document.getElementById('modalTransferirReserva')).show();
+        }
+        
+        async function confirmarTransferencia() {
+            const fd = new FormData(document.getElementById('formTransferirReserva'));
+            const origemId = fd.get('origemId');
+            const destinoId = fd.get('destinoId');
+            const valor = parseFloat(fd.get('valor'));
+            const observacao = fd.get('observacao');
+            
+            if (!destinoId) {
+                exibirMensagem('warning', 'Selecione a reserva destino');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/meu-financeiro/reservas/transferir', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ origemId: parseInt(origemId), destinoId: parseInt(destinoId), valor, observacao })
+                });
+                
+                if (!response.ok) throw new Error('Erro ao transferir');
+                
+                bootstrap.Modal.getInstance(document.getElementById('modalTransferirReserva')).hide();
+                exibirMensagem('success', 'Transferência realizada com sucesso!');
+                await carregar();
+            } catch (e) {
+                exibirMensagem('danger', e.message || 'Erro ao transferir');
+            }
+        }
+        
+        function abrirMudarTipo(id) {
+            const reserva = reservasLista.find(r => r.id === id);
+            if (!reserva) return;
+            
+            document.getElementById('mudarTipoId').value = id;
+            document.getElementById('mudarTipoNome').textContent = reserva.nome;
+            document.getElementById('mudarTipoAtual').textContent = reserva.tipo;
+            document.getElementById('mudarTipoNovo').value = reserva.tipo;
+            
+            document.getElementById('formMudarTipo').reset();
+            document.getElementById('mudarTipoId').value = id;
+            document.getElementById('mudarTipoAtual').textContent = reserva.tipo;
+            new bootstrap.Modal(document.getElementById('modalMudarTipo')).show();
+        }
+        
+        async function confirmarMudancaTipo() {
+            const fd = new FormData(document.getElementById('formMudarTipo'));
+            const id = fd.get('reservaId');
+            const tipo = fd.get('tipo');
+            const observacao = fd.get('observacao');
+            
+            try {
+                const response = await fetch(`/api/meu-financeiro/reservas/${id}/transferir-tipo`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tipo, observacao })
+                });
+                
+                if (!response.ok) throw new Error('Erro ao mudar tipo');
+                
+                bootstrap.Modal.getInstance(document.getElementById('modalMudarTipo')).hide();
+                exibirMensagem('success', 'Tipo de reserva alterado com sucesso!');
+                await carregar();
+            } catch (e) {
+                exibirMensagem('danger', e.message || 'Erro ao mudar tipo');
+            }
+        }
+        
+        async function excluirMeta(id) {
+            if (!confirm('Tem certeza que deseja excluir a meta desta reserva?')) return;
+            
+            try {
+                const response = await fetch(`/api/meu-financeiro/reservas/${id}/meta`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ observacao: 'Meta excluída pelo usuário' })
+                });
+                
+                if (!response.ok) throw new Error('Erro ao excluir meta');
+                
+                exibirMensagem('success', 'Meta excluída com sucesso!');
+                await carregar();
+            } catch (e) {
+                exibirMensagem('danger', e.message || 'Erro ao excluir meta');
+            }
+        }
+        
+        function adicionarValor(id) {
+            const reserva = reservasLista.find(r => r.id === id);
+            if (!reserva) return;
+            
+            const valor = prompt(`Adicionar valor à reserva "${reserva.nome}":\n\nSaldo atual: ${formatarMoeda(reserva.saldoAtual || 0)}`);
+            if (!valor || isNaN(parseFloat(valor))) return;
+            
+            const observacao = prompt('Observação (opcional):') || null;
+            
+            fetch(`/api/meu-financeiro/reservas/${id}/adicionar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ valor: parseFloat(valor), observacao })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Erro ao adicionar valor');
+                exibirMensagem('success', 'Valor adicionado com sucesso!');
+                carregar();
+            })
+            .catch(e => exibirMensagem('danger', e.message || 'Erro ao adicionar valor'));
+        }
+        
+        async function verHistorico(id) {
+            try {
+                const response = await fetch(`/api/meu-financeiro/reservas/${id}/historico`);
+                const historico = await response.json();
+                
+                const reserva = reservasLista.find(r => r.id === id);
+                const conteudo = document.getElementById('historicoConteudo');
+                
+                if (historico.length === 0) {
+                    conteudo.innerHTML = '<p class="text-center text-muted">Nenhuma movimentação registrada</p>';
+                } else {
+                    conteudo.innerHTML = `
+                        <h6 class="mb-3">Reserva: <strong>${reserva.nome}</strong></h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>Tipo</th>
+                                        <th>Valor</th>
+                                        <th>Saldo Anterior</th>
+                                        <th>Saldo Atualizado</th>
+                                        <th>Observação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${historico.map(m => {
+                                        const data = new Date(m.criadoEm).toLocaleString('pt-BR');
+                                        const tipoClass = m.tipo === 'DEPOSITO' || m.tipo === 'TRANSFERENCIA_ENTRADA' ? 'text-success' :
+                                                         m.tipo === 'SAQUE_EMERGENCIAL' || m.tipo === 'SAQUE_TOTAL' || m.tipo === 'TRANSFERENCIA_SAIDA' ? 'text-danger' : 'text-info';
+                                        return `
+                                            <tr>
+                                                <td>${data}</td>
+                                                <td><span class="${tipoClass}">${m.tipo}</span></td>
+                                                <td>${formatarMoeda(m.valor || 0)}</td>
+                                                <td>${formatarMoeda(m.saldoAnterior || 0)}</td>
+                                                <td><strong>${formatarMoeda(m.saldoAtualizado || 0)}</strong></td>
+                                                <td>${m.observacao || '-'}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                new bootstrap.Modal(document.getElementById('modalHistorico')).show();
+            } catch (e) {
+                exibirMensagem('danger', 'Erro ao carregar histórico');
+            }
+        }
+        
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', carregar);
         } else {

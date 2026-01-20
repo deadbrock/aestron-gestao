@@ -124,16 +124,62 @@ public class MeuFinanceiroController {
         return ResponseEntity.ok(service.salvarReserva(reserva));
     }
     
+    @PutMapping("/reservas/{id}")
+    public ResponseEntity<ReservaFinanceira> atualizarReserva(@PathVariable Long id, @RequestBody ReservaFinanceira reserva) {
+        return ResponseEntity.ok(service.atualizarReserva(id, reserva));
+    }
+    
     @PostMapping("/reservas/{id}/adicionar")
-    public ResponseEntity<Void> adicionarValor(@PathVariable Long id, @RequestParam BigDecimal valor) {
-        service.adicionarValorReserva(id, valor);
+    public ResponseEntity<Void> adicionarValor(@PathVariable Long id, @RequestBody Map<String, Object> dados) {
+        BigDecimal valor = new BigDecimal(dados.get("valor").toString());
+        String observacao = dados.containsKey("observacao") ? dados.get("observacao").toString() : null;
+        service.adicionarValorReserva(id, valor, observacao);
         return ResponseEntity.ok().build();
     }
     
-    @PostMapping("/reservas/{id}/retirar")
-    public ResponseEntity<Void> retirarValor(@PathVariable Long id, @RequestParam BigDecimal valor) {
-        service.retirarValorReserva(id, valor);
+    @PostMapping("/reservas/{id}/saque-emergencial")
+    public ResponseEntity<Void> saqueEmergencial(@PathVariable Long id, @RequestBody Map<String, Object> dados) {
+        BigDecimal valor = new BigDecimal(dados.get("valor").toString());
+        String observacao = dados.containsKey("observacao") ? dados.get("observacao").toString() : null;
+        service.saqueEmergencial(id, valor, observacao);
         return ResponseEntity.ok().build();
+    }
+    
+    @PostMapping("/reservas/{id}/saque-total")
+    public ResponseEntity<Void> saqueTotal(@PathVariable Long id, @RequestBody Map<String, String> dados) {
+        String observacao = dados.getOrDefault("observacao", "Saque total realizado");
+        service.saqueTotal(id, observacao);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PostMapping("/reservas/transferir")
+    public ResponseEntity<Void> transferirReserva(@RequestBody Map<String, Object> dados) {
+        Long origemId = Long.valueOf(dados.get("origemId").toString());
+        Long destinoId = Long.valueOf(dados.get("destinoId").toString());
+        BigDecimal valor = new BigDecimal(dados.get("valor").toString());
+        String observacao = dados.containsKey("observacao") ? dados.get("observacao").toString() : null;
+        service.transferirReserva(origemId, destinoId, valor, observacao);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PostMapping("/reservas/{id}/transferir-tipo")
+    public ResponseEntity<Void> transferirTipoReserva(@PathVariable Long id, @RequestBody Map<String, String> dados) {
+        ReservaFinanceira.TipoReserva novoTipo = ReservaFinanceira.TipoReserva.valueOf(dados.get("tipo"));
+        String observacao = dados.getOrDefault("observacao", null);
+        service.transferirTipoReserva(id, novoTipo, observacao);
+        return ResponseEntity.ok().build();
+    }
+    
+    @DeleteMapping("/reservas/{id}/meta")
+    public ResponseEntity<Void> excluirMeta(@PathVariable Long id, @RequestBody(required = false) Map<String, String> dados) {
+        String observacao = dados != null ? dados.getOrDefault("observacao", null) : null;
+        service.excluirMeta(id, observacao);
+        return ResponseEntity.ok().build();
+    }
+    
+    @GetMapping("/reservas/{id}/historico")
+    public ResponseEntity<List<MovimentacaoReserva>> obterHistorico(@PathVariable Long id) {
+        return ResponseEntity.ok(service.obterHistoricoReserva(id));
     }
     
     @GetMapping("/reservas/resumo")
