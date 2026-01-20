@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +22,7 @@ public class ObrigacaoMEIService {
     private final ObrigacaoMEIRepository obrigacaoRepository;
     
     // Valor base do DAS MEI para 2026 (ajustar conforme legislação)
-    private static final BigDecimal VALOR_DAS_BASE = new BigDecimal("75.00");
+    private static final BigDecimal VALOR_DAS_BASE = new BigDecimal("82.00");
     
     public List<ObrigacaoMEI> listarTodas() {
         return obrigacaoRepository.findAll();
@@ -91,6 +93,43 @@ public class ObrigacaoMEIService {
                 obrigacaoRepository.save(das);
             }
         }
+    }
+    
+    /**
+     * Atualiza o valor dos DAS de um ano específico para o valor correto atual
+     * Útil para corrigir DAS gerados com valores antigos
+     */
+    @Transactional
+    public int atualizarValorDASAno(int ano) {
+        List<ObrigacaoMEI> dasAno = obrigacaoRepository
+            .findByMesReferenciaAndAnoReferencia(1, ano)
+            .stream()
+            .filter(o -> o.getTipo() == ObrigacaoMEI.TipoObrigacao.DAS)
+            .collect(java.util.stream.Collectors.toList());
+        
+        // Buscar todos os DAS do ano
+        List<ObrigacaoMEI> todosDas = new ArrayList<>();
+        for (int mes = 1; mes <= 12; mes++) {
+            List<ObrigacaoMEI> dasMes = obrigacaoRepository
+                .findByMesReferenciaAndAnoReferencia(mes, ano)
+                .stream()
+                .filter(o -> o.getTipo() == ObrigacaoMEI.TipoObrigacao.DAS)
+                .collect(Collectors.toList());
+            todosDas.addAll(dasMes);
+        }
+        
+        int atualizados = 0;
+        for (ObrigacaoMEI das : todosDas) {
+            // Atualizar apenas se ainda não foi pago e o valor está diferente
+            if (das.getStatus() != ObrigacaoMEI.StatusObrigacao.PAGO && 
+                das.getValor().compareTo(VALOR_DAS_BASE) != 0) {
+                das.setValor(VALOR_DAS_BASE);
+                obrigacaoRepository.save(das);
+                atualizados++;
+            }
+        }
+        
+        return atualizados;
     }
     
     public void gerarDASNSIMEI(int ano) {

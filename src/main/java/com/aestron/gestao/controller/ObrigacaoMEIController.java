@@ -74,7 +74,13 @@ public class ObrigacaoMEIController {
     @PostMapping("/gerar-das/{ano}")
     public ResponseEntity<String> gerarDASAnual(@PathVariable int ano) {
         obrigacaoService.gerarDASAnual(ano);
-        return ResponseEntity.ok("DAS gerado com sucesso para o ano " + ano);
+        return ResponseEntity.ok("DAS gerado com sucesso para o ano " + ano + " com valor de R$ 82,00");
+    }
+    
+    @PostMapping("/atualizar-das/{ano}")
+    public ResponseEntity<String> atualizarValorDAS(@PathVariable int ano) {
+        int atualizados = obrigacaoService.atualizarValorDASAno(ano);
+        return ResponseEntity.ok("Atualizados " + atualizados + " DAS do ano " + ano + " para o valor de R$ 82,00");
     }
     
     @PostMapping("/gerar-dasn/{ano}")
