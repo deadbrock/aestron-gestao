@@ -453,16 +453,7 @@
         });
         
         // Funções auxiliares globais
-        function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor);
-        }
-        
-        function formatarData(data) {
-            return new Date(data).toLocaleDateString('pt-BR');
-        }
+        // formatarMoeda e formatarData agora estão em /js/app-utils.js
         
         function exibirMensagem(tipo, mensagem) {
             const alertDiv = document.createElement('div');

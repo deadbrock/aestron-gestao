@@ -111,10 +111,18 @@ function exibirMensagem(tipo, mensagem) {
 }
 
 // Formatador de moeda brasileiro
-const formatarMoeda = new Intl.NumberFormat('pt-BR', {
+const fmt = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
 });
+
+// Função para formatar valores monetários
+function formatarMoeda(valor) {
+    if (valor === null || valor === undefined || isNaN(valor)) {
+        return fmt.format(0);
+    }
+    return fmt.format(valor);
+}
 
 // Formatador de data brasileiro
 function formatarData(dataISO) {
