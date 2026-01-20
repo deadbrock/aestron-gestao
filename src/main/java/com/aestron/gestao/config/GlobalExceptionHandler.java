@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -15,6 +16,14 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(Exception.class)
     public ModelAndView handleException(HttpServletRequest request, Exception ex) {
+        // Ignorar erros de recursos estáticos não encontrados (favicon, etc)
+        if (ex instanceof NoResourceFoundException) {
+            String path = request.getRequestURI();
+            if (path != null && (path.contains("favicon.ico") || path.contains(".ico") || path.contains(".png") || path.contains(".jpg"))) {
+                return null; // Retorna null para não processar o erro
+            }
+        }
+        
         log.error("╔═══════════════════════════════════════════════════════════════");
         log.error("║ ERRO CAPTURADO NO GLOBAL EXCEPTION HANDLER");
         log.error("╠═══════════════════════════════════════════════════════════════");

@@ -92,7 +92,15 @@
                     <form id="formNovoCliente">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nome Completo *</label>
+                                <label class="form-label fw-bold">Tipo de Pessoa *</label>
+                                <select class="form-select" name="tipoPessoa" id="tipoPessoa" required style="border-radius: 10px;">
+                                    <option value="">Selecione...</option>
+                                    <option value="PF">Pessoa Física (PF)</option>
+                                    <option value="PJ">Pessoa Jurídica (PJ)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nome Completo / Razão Social *</label>
                                 <input type="text" class="form-control" name="nome" required style="border-radius: 10px;">
                             </div>
                             <div class="col-md-6 mb-3">
@@ -104,8 +112,8 @@
                                 <input type="text" class="form-control" name="telefone" style="border-radius: 10px;">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">CPF/CNPJ</label>
-                                <input type="text" class="form-control" name="cpfCnpj" style="border-radius: 10px;">
+                                <label class="form-label fw-bold" id="labelCpfCnpj">CPF/CNPJ</label>
+                                <input type="text" class="form-control" name="cpfCnpj" id="cpfCnpj" style="border-radius: 10px;" placeholder="Digite o CPF ou CNPJ">
                             </div>
                         </div>
                     </form>
@@ -159,8 +167,15 @@
             const form = document.getElementById('formNovoCliente');
             const formData = new FormData(form);
             
+            const tipoPessoa = formData.get('tipoPessoa');
+            if (!tipoPessoa) {
+                alert('Por favor, selecione o tipo de pessoa (PF ou PJ)');
+                return;
+            }
+            
             const cliente = {
                 nome: formData.get('nome'),
+                tipoPessoa: tipoPessoa,
                 email: formData.get('email'),
                 telefone: formData.get('telefone'),
                 cpfCnpj: formData.get('cpfCnpj'),
@@ -175,6 +190,28 @@
                 mensagemErro: 'Erro ao salvar cliente. Verifique os dados e tente novamente.'
             });
         }
+        
+        // Atualizar label do CPF/CNPJ baseado no tipo selecionado
+        document.addEventListener('DOMContentLoaded', function() {
+            const tipoPessoaSelect = document.getElementById('tipoPessoa');
+            const labelCpfCnpj = document.getElementById('labelCpfCnpj');
+            const inputCpfCnpj = document.getElementById('cpfCnpj');
+            
+            if (tipoPessoaSelect) {
+                tipoPessoaSelect.addEventListener('change', function() {
+                    if (this.value === 'PF') {
+                        labelCpfCnpj.textContent = 'CPF';
+                        inputCpfCnpj.placeholder = 'Digite o CPF';
+                    } else if (this.value === 'PJ') {
+                        labelCpfCnpj.textContent = 'CNPJ';
+                        inputCpfCnpj.placeholder = 'Digite o CNPJ';
+                    } else {
+                        labelCpfCnpj.textContent = 'CPF/CNPJ';
+                        inputCpfCnpj.placeholder = 'Digite o CPF ou CNPJ';
+                    }
+                });
+            }
+        });
 
         document.getElementById('buscaCliente').addEventListener('input', (e) => {
             const termo = e.target.value.toLowerCase();
