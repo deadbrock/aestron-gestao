@@ -74,9 +74,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
         async function carregar() {
             try {
                 const res = await fetch('/api/meu-financeiro/reservas');
@@ -86,8 +84,8 @@
                 (data || []).forEach(r => { totalReservas += r.valorAtual; metaTotal += r.valorMeta; });
                 const progressoGeral = metaTotal > 0 ? ((totalReservas / metaTotal) * 100) : 0;
                 
-                document.getElementById('totalReservas').textContent = fmt.format(totalReservas);
-                document.getElementById('metaTotal').textContent = fmt.format(metaTotal);
+                document.getElementById('totalReservas').textContent = formatarMoeda(totalReservas);
+                document.getElementById('metaTotal').textContent = formatarMoeda(metaTotal);
                 document.getElementById('progressoGeral').textContent = progressoGeral.toFixed(1) + '%';
                 
                 const container = document.getElementById('reservas');
@@ -106,11 +104,11 @@
                                         <p class="text-muted mb-3">${r.descricao || 'Sem descrição'}</p>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span><strong>Valor Atual:</strong></span>
-                                            <span class="text-success"><strong>${fmt.format(r.valorAtual)}</strong></span>
+                                            <span class="text-success"><strong>${formatarMoeda(r.valorAtual)}</strong></span>
                                         </div>
                                         <div class="d-flex justify-content-between mb-3">
                                             <span><strong>Meta:</strong></span>
-                                            <span class="text-primary"><strong>${fmt.format(r.valorMeta)}</strong></span>
+                                            <span class="text-primary"><strong>${formatarMoeda(r.valorMeta)}</strong></span>
                                         </div>
                                         <div class="progress" style="height: 25px; border-radius: 15px;">
                                             <div class="progress-bar" style="width: ${progresso}%; background: ${cor}; font-weight: 600;" role="progressbar">
@@ -118,7 +116,7 @@
                                             </div>
                                         </div>
                                         <div class="text-center mt-2">
-                                            <small class="text-muted">Faltam ${fmt.format(Math.max(0, r.valorMeta - r.valorAtual))}</small>
+                                            <small class="text-muted">Faltam ${formatarMoeda(Math.max(0, r.valorMeta - r.valorAtual))}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -132,6 +130,13 @@
         }
         
         async function salvar() {
+            // Verificar se salvarComSeguranca está disponível
+            if (typeof salvarComSeguranca === 'undefined') {
+                console.error('salvarComSeguranca não está disponível. Verifique se app-utils.js foi carregado.');
+                alert('Erro: Função de salvamento não disponível. Recarregue a página.');
+                return;
+            }
+            
             const fd = new FormData(document.getElementById('form'));
             const reserva = {
                 nome: fd.get('nome'),
@@ -149,7 +154,12 @@
             });
         }
         
-        document.addEventListener('DOMContentLoaded', carregar);
+        // Aguardar carregamento completo antes de executar
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', carregar);
+        } else {
+            carregar();
+        }
     </script>
     </th:block>
 </body>
