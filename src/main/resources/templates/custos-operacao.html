@@ -113,7 +113,7 @@
                 const data = await res.json();
                 
                 let totalMensal = 0;
-                (data || []).forEach(c => totalMensal += c.valorMensal);
+                (data || []).forEach(c => totalMensal += (c.valor || 0));
                 const totalAnual = totalMensal * 12;
                 const qtd = data ? data.length : 0;
                 const media = qtd > 0 ? totalMensal / qtd : 0;
@@ -127,11 +127,11 @@
                 if (data && data.length > 0) {
                     tbody.innerHTML = data.map(c => `
                         <tr>
-                            <td><strong>${c.descricao}</strong></td>
-                            <td><span class="badge badge-modern" style="background: ${c.categoria === 'FIXO' ? '#1e40af' : '#06b6d4'};">${c.categoria}</span></td>
-                            <td>${fmt.format(c.valorMensal)}</td>
-                            <td>${fmt.format(c.valorMensal * 12)}</td>
-                            <td>${c.recorrente ? '<span class="badge bg-success badge-modern">Sim</span>' : '<span class="badge bg-secondary badge-modern">Não</span>'}</td>
+                            <td><strong>${c.descricao || ''}</strong></td>
+                            <td><span class="badge badge-modern" style="background: ${c.tipo === 'FIXO' ? '#1e40af' : '#06b6d4'};">${c.tipo || c.categoria || ''}</span></td>
+                            <td>${fmt.format(c.valor || 0)}</td>
+                            <td>${fmt.format((c.valor || 0) * 12)}</td>
+                            <td>${c.recorrencia === 'MENSAL' ? '<span class="badge bg-success badge-modern">Sim</span>' : '<span class="badge bg-secondary badge-modern">Não</span>'}</td>
                         </tr>
                     `).join('');
                 } else {
@@ -142,22 +142,25 @@
         
         async function salvar() {
             const fd = new FormData(document.getElementById('form'));
+            const recorrente = document.getElementById('recorrente').checked;
+            
             const custo = {
                 descricao: fd.get('descricao'),
-                categoria: fd.get('categoria'),
-                valorMensal: parseFloat(fd.get('valorMensal')),
-                recorrente: document.getElementById('recorrente').checked
+                tipo: fd.get('categoria'), // FIXO ou VARIAVEL
+                categoria: fd.get('descricao'), // Usar descrição como categoria também
+                valor: parseFloat(fd.get('valorMensal')),
+                recorrencia: recorrente ? 'MENSAL' : 'UNICO',
+                status: 'PENDENTE',
+                ativo: true
             };
-            try {
-                await fetch('/api/meu-financeiro/custos', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(custo) 
-                });
-                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
-                document.getElementById('form').reset();
-                carregar();
-            } catch (e) { alert('Erro ao salvar!'); }
+            
+            await salvarComSeguranca('/api/meu-financeiro/custos', custo, {
+                modalId: 'modal',
+                formId: 'form',
+                callbackSucesso: carregar,
+                mensagemSucesso: 'Custo cadastrado com sucesso!',
+                mensagemErro: 'Erro ao salvar custo. Verifique os dados e tente novamente.'
+            });
         }
         
         document.addEventListener('DOMContentLoaded', carregar);
