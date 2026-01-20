@@ -140,16 +140,13 @@
                 valorMeta: parseFloat(fd.get('valorMeta')),
                 descricao: fd.get('descricao')
             };
-            try {
-                await fetch('/api/meu-financeiro/reservas', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(reserva) 
-                });
-                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
-                document.getElementById('form').reset();
-                carregar();
-            } catch (e) { alert('Erro ao salvar!'); }
+            await salvarComSeguranca('/api/meu-financeiro/reservas', reserva, {
+                modalId: 'modal',
+                formId: 'form',
+                callbackSucesso: carregar,
+                mensagemSucesso: 'Reserva cadastrada com sucesso!',
+                mensagemErro: 'Erro ao salvar reserva. Verifique os dados e tente novamente.'
+            });
         }
         
         document.addEventListener('DOMContentLoaded', carregar);

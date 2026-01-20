@@ -102,12 +102,13 @@
         async function salvar() {
             const fd = new FormData(document.getElementById('form'));
             const conta = { descricao: fd.get('descricao'), dataVencimento: fd.get('dataVencimento'), valor: parseFloat(fd.get('valor')), status: 'PENDENTE' };
-            try {
-                await fetch('/api/gestao/contas-pagar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(conta) });
-                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
-                document.getElementById('form').reset();
-                carregar();
-            } catch (e) { alert('Erro!'); }
+            await salvarComSeguranca('/api/gestao/contas-pagar', conta, {
+                modalId: 'modal',
+                formId: 'form',
+                callbackSucesso: carregar,
+                mensagemSucesso: 'Conta a pagar cadastrada com sucesso!',
+                mensagemErro: 'Erro ao salvar conta. Verifique os dados e tente novamente.'
+            });
         }
         document.addEventListener('DOMContentLoaded', carregar);
     </script>

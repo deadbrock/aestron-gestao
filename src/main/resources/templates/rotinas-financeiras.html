@@ -138,16 +138,13 @@
                 horario: fd.get('horario'),
                 concluida: false
             };
-            try {
-                await fetch('/api/meu-financeiro/rotinas', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(rotina) 
-                });
-                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
-                document.getElementById('form').reset();
-                carregar();
-            } catch (e) { alert('Erro ao salvar!'); }
+            await salvarComSeguranca('/api/meu-financeiro/rotinas', rotina, {
+                modalId: 'modal',
+                formId: 'form',
+                callbackSucesso: carregar,
+                mensagemSucesso: 'Rotina financeira cadastrada com sucesso!',
+                mensagemErro: 'Erro ao salvar rotina. Verifique os dados e tente novamente.'
+            });
         }
         
         document.addEventListener('DOMContentLoaded', carregar);

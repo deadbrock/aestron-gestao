@@ -173,29 +173,13 @@
                 valor: valor,
                 mesReferencia: fd.get('mesReferencia')
             };
-            try {
-                await fetch('/api/meu-financeiro/pro-labore', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(prolabore) 
-                });
-                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
-                document.getElementById('form').reset();
-                carregar();
-                
-                // Mensagem de sucesso
-                const toast = document.createElement('div');
-                toast.className = 'alert alert-success alert-dismissible fade show position-fixed';
-                toast.style = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-                toast.innerHTML = `
-                    <i class="bi bi-check-circle-fill"></i> <strong>Salário registrado com sucesso!</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
-            } catch (e) { 
-                alert('❌ Erro ao registrar salário. Tente novamente!'); 
-            }
+            await salvarComSeguranca('/api/meu-financeiro/pro-labore', prolabore, {
+                modalId: 'modal',
+                formId: 'form',
+                callbackSucesso: carregar,
+                mensagemSucesso: 'Salário registrado com sucesso!',
+                mensagemErro: 'Erro ao registrar salário. Verifique os dados e tente novamente.'
+            });
         }
         
         document.addEventListener('DOMContentLoaded', carregar);

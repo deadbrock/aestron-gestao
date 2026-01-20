@@ -168,23 +168,13 @@
                 ativo: true
             };
             
-            try {
-                const response = await fetch('/api/gestao/fornecedores', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(fornecedor)
-                });
-                
-                if (response.ok) {
-                    bootstrap.Modal.getInstance(document.getElementById('modalNovoFornecedor')).hide();
-                    form.reset();
-                    carregarFornecedores();
-                    alert('Fornecedor cadastrado com sucesso!');
-                }
-            } catch (error) {
-                console.error('Erro ao salvar fornecedor:', error);
-                alert('Erro ao salvar fornecedor!');
-            }
+            await salvarComSeguranca('/api/gestao/fornecedores', fornecedor, {
+                modalId: 'modalNovoFornecedor',
+                formId: 'formNovoFornecedor',
+                callbackSucesso: carregarFornecedores,
+                mensagemSucesso: 'Fornecedor cadastrado com sucesso!',
+                mensagemErro: 'Erro ao salvar fornecedor. Verifique os dados e tente novamente.'
+            });
         }
 
         document.getElementById('buscaFornecedor').addEventListener('input', (e) => {

@@ -154,16 +154,13 @@
                 valorAtual: parseFloat(fd.get('valorAtual')),
                 dataInvestimento: fd.get('dataInvestimento')
             };
-            try {
-                await fetch('/api/meu-financeiro/investimentos', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(inv) 
-                });
-                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
-                document.getElementById('form').reset();
-                carregar();
-            } catch (e) { alert('Erro ao salvar!'); }
+            await salvarComSeguranca('/api/meu-financeiro/investimentos', inv, {
+                modalId: 'modal',
+                formId: 'form',
+                callbackSucesso: carregar,
+                mensagemSucesso: 'Investimento cadastrado com sucesso!',
+                mensagemErro: 'Erro ao salvar investimento. Verifique os dados e tente novamente.'
+            });
         }
         
         document.addEventListener('DOMContentLoaded', carregar);

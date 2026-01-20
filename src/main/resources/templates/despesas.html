@@ -234,20 +234,13 @@
                     recorrente: document.getElementById('recorrente').checked
                 };
                 
-                try {
-                    await fetch('/api/despesas', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(despesa)
-                    });
-                    
-                    bootstrap.Modal.getInstance(document.getElementById('modalDespesa')).hide();
-                    document.getElementById('formDespesa').reset();
-                    carregarDespesas();
-                    exibirMensagem('success', 'Despesa cadastrada com sucesso!');
-                } catch (error) {
-                    exibirMensagem('danger', 'Erro ao salvar despesa');
-                }
+                await salvarComSeguranca('/api/despesas', despesa, {
+                    modalId: 'modalDespesa',
+                    formId: 'formDespesa',
+                    callbackSucesso: carregarDespesas,
+                    mensagemSucesso: 'Despesa cadastrada com sucesso!',
+                    mensagemErro: 'Erro ao salvar despesa. Verifique os dados e tente novamente.'
+                });
             }
             
             async function marcarPago(id) {

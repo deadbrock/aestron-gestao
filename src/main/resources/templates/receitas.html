@@ -262,20 +262,13 @@
                     recebido: document.getElementById('recebido').checked
                 };
                 
-                try {
-                    await fetch('/api/receitas', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(receita)
-                    });
-                    
-                    bootstrap.Modal.getInstance(document.getElementById('modalReceita')).hide();
-                    document.getElementById('formReceita').reset();
-                    carregarReceitas();
-                    exibirMensagem('success', 'Receita cadastrada com sucesso!');
-                } catch (error) {
-                    exibirMensagem('danger', 'Erro ao salvar receita');
-                }
+                await salvarComSeguranca('/api/receitas', receita, {
+                    modalId: 'modalReceita',
+                    formId: 'formReceita',
+                    callbackSucesso: carregarReceitas,
+                    mensagemSucesso: 'Receita cadastrada com sucesso!',
+                    mensagemErro: 'Erro ao salvar receita. Verifique os dados e tente novamente.'
+                });
             }
             
             async function marcarRecebido(id) {

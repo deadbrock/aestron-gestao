@@ -167,36 +167,13 @@
                 ativo: true
             };
             
-            try {
-                await fetch('/api/gestao/clientes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(cliente)
-                });
-                
-                bootstrap.Modal.getInstance(document.getElementById('modalNovoCliente')).hide();
-                form.reset();
-                carregarClientes();
-                
-                // Mostrar toast de sucesso
-                const toast = document.createElement('div');
-                toast.className = 'position-fixed top-0 end-0 p-3';
-                toast.style.zIndex = '9999';
-                toast.innerHTML = `
-                    <div class="toast show" role="alert">
-                        <div class="toast-header bg-success text-white">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong class="me-auto">Sucesso!</strong>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                        </div>
-                        <div class="toast-body">Cliente cadastrado com sucesso!</div>
-                    </div>
-                `;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
-            } catch (error) {
-                alert('Erro ao salvar!');
-            }
+            await salvarComSeguranca('/api/gestao/clientes', cliente, {
+                modalId: 'modalNovoCliente',
+                formId: 'formNovoCliente',
+                callbackSucesso: carregarClientes,
+                mensagemSucesso: 'Cliente cadastrado com sucesso!',
+                mensagemErro: 'Erro ao salvar cliente. Verifique os dados e tente novamente.'
+            });
         }
 
         document.getElementById('buscaCliente').addEventListener('input', (e) => {

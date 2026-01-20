@@ -86,12 +86,13 @@
         async function salvar() {
             const fd = new FormData(document.getElementById('form'));
             const meta = { titulo: fd.get('titulo'), valorMeta: parseFloat(fd.get('valorMeta')), valorAtual: parseFloat(fd.get('valorAtual')), tipoMeta: 'ECONOMIA', status: 'ATIVA', ativa: true };
-            try {
-                await fetch('/api/gestao/metas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(meta) });
-                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
-                document.getElementById('form').reset();
-                carregar();
-            } catch (e) { alert('Erro!'); }
+            await salvarComSeguranca('/api/gestao/metas', meta, {
+                modalId: 'modal',
+                formId: 'form',
+                callbackSucesso: carregar,
+                mensagemSucesso: 'Meta financeira cadastrada com sucesso!',
+                mensagemErro: 'Erro ao salvar meta. Verifique os dados e tente novamente.'
+            });
         }
         document.addEventListener('DOMContentLoaded', carregar);
     </script>

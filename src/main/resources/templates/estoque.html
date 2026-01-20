@@ -112,12 +112,13 @@
         async function salvar() {
             const fd = new FormData(document.getElementById('form'));
             const produto = { nome: fd.get('nome'), quantidadeEstoque: parseInt(fd.get('quantidadeEstoque')), estoqueMinimo: parseInt(fd.get('estoqueMinimo')), precoVenda: parseFloat(fd.get('precoVenda')), unidade: 'UN' };
-            try {
-                await fetch('/api/gestao/produtos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(produto) });
-                bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
-                document.getElementById('form').reset();
-                carregar();
-            } catch (e) { alert('Erro!'); }
+            await salvarComSeguranca('/api/gestao/produtos', produto, {
+                modalId: 'modal',
+                formId: 'form',
+                callbackSucesso: carregar,
+                mensagemSucesso: 'Produto cadastrado com sucesso!',
+                mensagemErro: 'Erro ao salvar produto. Verifique os dados e tente novamente.'
+            });
         }
         document.addEventListener('DOMContentLoaded', carregar);
     </script>
