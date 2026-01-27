@@ -65,6 +65,32 @@ public class Portfolio {
     
     private Integer quantidadeEstoque;
     
+    // Campos para gerenciamento de desenvolvimento
+    @Column(name = "em_desenvolvimento")
+    private Boolean emDesenvolvimento = false;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "fase_desenvolvimento")
+    private FaseDesenvolvimento faseDesenvolvimento;
+    
+    @Column(name = "data_previsao_entrega")
+    private java.time.LocalDate dataPrevisaoEntrega;
+    
+    @Column(name = "percentual_conclusao")
+    private Integer percentualConclusao = 0;
+    
+    @Column(name = "documentacao_atualizada")
+    private Boolean documentacaoAtualizada = false;
+    
+    @Column(name = "testes_realizados")
+    private Boolean testesRealizados = false;
+    
+    @Column(name = "homologacao_cliente")
+    private Boolean homologacaoCliente = false;
+    
+    @Column(name = "observacoes_desenvolvimento", columnDefinition = "TEXT")
+    private String observacoesDesenvolvimento;
+    
     @Column(nullable = false, updatable = false)
     private LocalDateTime criadoEm = LocalDateTime.now();
     
@@ -89,6 +115,28 @@ public class Portfolio {
         private final String descricao;
         
         TipoProduto(String descricao) {
+            this.descricao = descricao;
+        }
+        
+        public String getDescricao() {
+            return descricao;
+        }
+    }
+    
+    public enum FaseDesenvolvimento {
+        LEVANTAMENTO_REQUISITOS("Levantamento de Requisitos"),
+        PROTOTIPACAO("Prototipação / Design"),
+        DESENVOLVIMENTO_INICIAL("Desenvolvimento Inicial (0-30%)"),
+        DESENVOLVIMENTO_INTERMEDIARIO("Desenvolvimento Intermediário (30-60%)"),
+        DESENVOLVIMENTO_AVANCADO("Desenvolvimento Avançado (60-90%)"),
+        TESTES("Testes e Ajustes"),
+        HOMOLOGACAO("Homologação com Cliente"),
+        FINALIZACAO("Finalização e Deploy"),
+        CONCLUIDO("Concluído");
+        
+        private final String descricao;
+        
+        FaseDesenvolvimento(String descricao) {
             this.descricao = descricao;
         }
         

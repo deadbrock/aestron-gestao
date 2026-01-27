@@ -123,6 +123,79 @@
                                         <input class="form-check-input" type="checkbox" id="destaque">
                                         <label class="form-check-label" for="destaque">Produto em Destaque</label>
                                     </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="emDesenvolvimento" onchange="toggleCamposDesenvolvimento()">
+                                        <label class="form-check-label" for="emDesenvolvimento">
+                                            <i class="bi bi-code-slash"></i> Em Desenvolvimento
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- Campos de Desenvolvimento (ocultos por padrão) -->
+                                <div id="camposDesenvolvimento" style="display: none;">
+                                    <div class="col-md-12 mb-3">
+                                        <hr>
+                                        <h6 class="text-primary"><i class="bi bi-gear-fill"></i> Informações de Desenvolvimento</h6>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Fase de Desenvolvimento *</label>
+                                        <select class="form-select" id="faseDesenvolvimento">
+                                            <option value="">Selecione a fase...</option>
+                                            <option value="LEVANTAMENTO_REQUISITOS">📋 Levantamento de Requisitos</option>
+                                            <option value="PROTOTIPACAO">🎨 Prototipação / Design</option>
+                                            <option value="DESENVOLVIMENTO_INICIAL">⚙️ Desenvolvimento Inicial (0-30%)</option>
+                                            <option value="DESENVOLVIMENTO_INTERMEDIARIO">🔧 Desenvolvimento Intermediário (30-60%)</option>
+                                            <option value="DESENVOLVIMENTO_AVANCADO">🚀 Desenvolvimento Avançado (60-90%)</option>
+                                            <option value="TESTES">🧪 Testes e Ajustes</option>
+                                            <option value="HOMOLOGACAO">✅ Homologação com Cliente</option>
+                                            <option value="FINALIZACAO">🏁 Finalização e Deploy</option>
+                                            <option value="CONCLUIDO">✔️ Concluído</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Previsão de Entrega *</label>
+                                        <input type="date" class="form-control" id="dataPrevisaoEntrega">
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">% Concluído</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="percentualConclusao" min="0" max="100" value="0">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-8 mb-3">
+                                        <label class="form-label">Status da Documentação e Testes</label>
+                                        <div class="d-flex gap-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="documentacaoAtualizada">
+                                                <label class="form-check-label" for="documentacaoAtualizada">
+                                                    📄 Documentação Atualizada
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="testesRealizados">
+                                                <label class="form-check-label" for="testesRealizados">
+                                                    🧪 Testes Realizados
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="homologacaoCliente">
+                                                <label class="form-check-label" for="homologacaoCliente">
+                                                    ✅ Homologação Cliente
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Observações sobre o Desenvolvimento</label>
+                                        <textarea class="form-control" id="observacoesDesenvolvimento" rows="3" 
+                                                  placeholder="Ex: Aguardando aprovação do layout, Pendente integração com API, etc."></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -155,17 +228,49 @@
                         const margemLucro = produto.preco && produto.custoProducao ? 
                                            ((lucro / produto.preco) * 100).toFixed(1) : 0;
                         
+                        // Determinar cor da barra de progresso do desenvolvimento
+                        const progressoCor = produto.percentualConclusao >= 90 ? 'bg-success' :
+                                           produto.percentualConclusao >= 60 ? 'bg-info' :
+                                           produto.percentualConclusao >= 30 ? 'bg-warning' : 'bg-danger';
+                        
                         const col = document.createElement('div');
                         col.className = 'col-md-4 mb-4';
                         col.innerHTML = `
-                            <div class="card h-100 ${produto.destaque ? 'border-warning' : ''}">
-                                ${produto.destaque ? '<div class="badge bg-warning position-absolute top-0 end-0 m-2">Destaque</div>' : ''}
+                            <div class="card h-100 ${produto.destaque ? 'border-warning' : produto.emDesenvolvimento ? 'border-primary' : ''}">
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    ${produto.destaque ? '<span class="badge bg-warning me-1">Destaque</span>' : ''}
+                                    ${produto.emDesenvolvimento ? '<span class="badge bg-primary"><i class="bi bi-code-slash"></i> Em Desenvolvimento</span>' : ''}
+                                </div>
                                 <div class="card-body">
                                     <h5 class="card-title">
                                         ${produto.nome}
                                         ${!produto.ativo ? '<span class="badge bg-secondary">Inativo</span>' : ''}
                                     </h5>
                                     <p class="text-muted"><small><i class="bi bi-tag"></i> ${produto.tipo}</small></p>
+                                    
+                                    ${produto.emDesenvolvimento ? `
+                                        <div class="alert alert-info p-2 mb-2">
+                                            <strong><i class="bi bi-gear-fill"></i> ${produto.faseDesenvolvimento || 'Desenvolvimento'}</strong><br>
+                                            <small>
+                                                ${produto.dataPrevisaoEntrega ? 
+                                                    `📅 Previsão: ${formatarData(produto.dataPrevisaoEntrega)}` : 
+                                                    'Sem previsão definida'}
+                                            </small>
+                                            <div class="progress mt-2" style="height: 20px;">
+                                                <div class="progress-bar ${progressoCor}" style="width: ${produto.percentualConclusao || 0}%">
+                                                    ${produto.percentualConclusao || 0}%
+                                                </div>
+                                            </div>
+                                            <div class="mt-2">
+                                                ${produto.documentacaoAtualizada ? '<span class="badge bg-success me-1">📄 Doc OK</span>' : '<span class="badge bg-secondary me-1">📄 Doc Pendente</span>'}
+                                                ${produto.testesRealizados ? '<span class="badge bg-success me-1">🧪 Testes OK</span>' : '<span class="badge bg-secondary me-1">🧪 Sem Testes</span>'}
+                                                ${produto.homologacaoCliente ? '<span class="badge bg-success">✅ Homologado</span>' : '<span class="badge bg-secondary">⏳ Não Homologado</span>'}
+                                            </div>
+                                            ${produto.observacoesDesenvolvimento ? 
+                                                `<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> ${produto.observacoesDesenvolvimento}</small>` : ''}
+                                        </div>
+                                    ` : ''}
+                                    
                                     ${produto.descricao ? `<p class="card-text">${produto.descricao}</p>` : ''}
                                     
                                     ${produto.preco ? `
@@ -221,7 +326,26 @@
                 document.getElementById('totalCategorias').textContent = categorias;
             }
             
+            function toggleCamposDesenvolvimento() {
+                const checkbox = document.getElementById('emDesenvolvimento');
+                const campos = document.getElementById('camposDesenvolvimento');
+                const faseSelect = document.getElementById('faseDesenvolvimento');
+                const dataPrevisao = document.getElementById('dataPrevisaoEntrega');
+                
+                if (checkbox.checked) {
+                    campos.style.display = 'block';
+                    faseSelect.required = true;
+                    dataPrevisao.required = true;
+                } else {
+                    campos.style.display = 'none';
+                    faseSelect.required = false;
+                    dataPrevisao.required = false;
+                }
+            }
+            
             async function salvarPortfolio() {
+                const emDesenvolvimento = document.getElementById('emDesenvolvimento').checked;
+                
                 const portfolio = {
                     nome: document.getElementById('nomePortfolio').value,
                     tipo: document.getElementById('tipoPortfolio').value,
@@ -240,8 +364,21 @@
                     quantidadeEstoque: document.getElementById('estoque').value ? 
                                       parseInt(document.getElementById('estoque').value) : null,
                     ativo: document.getElementById('ativo').checked,
-                    destaque: document.getElementById('destaque').checked
+                    destaque: document.getElementById('destaque').checked,
+                    emDesenvolvimento: emDesenvolvimento
                 };
+                
+                // Adicionar campos de desenvolvimento se marcado
+                if (emDesenvolvimento) {
+                    portfolio.faseDesenvolvimento = document.getElementById('faseDesenvolvimento').value;
+                    portfolio.dataPrevisaoEntrega = document.getElementById('dataPrevisaoEntrega').value;
+                    portfolio.percentualConclusao = document.getElementById('percentualConclusao').value ? 
+                                                   parseInt(document.getElementById('percentualConclusao').value) : 0;
+                    portfolio.documentacaoAtualizada = document.getElementById('documentacaoAtualizada').checked;
+                    portfolio.testesRealizados = document.getElementById('testesRealizados').checked;
+                    portfolio.homologacaoCliente = document.getElementById('homologacaoCliente').checked;
+                    portfolio.observacoesDesenvolvimento = document.getElementById('observacoesDesenvolvimento').value;
+                }
                 
                 try {
                     await fetch('/api/portfolio', {
@@ -252,6 +389,7 @@
                     
                     bootstrap.Modal.getInstance(document.getElementById('modalPortfolio')).hide();
                     document.getElementById('formPortfolio').reset();
+                    toggleCamposDesenvolvimento(); // Ocultar campos de desenvolvimento
                     carregarPortfolio();
                     exibirMensagem('success', 'Produto cadastrado com sucesso!');
                 } catch (error) {

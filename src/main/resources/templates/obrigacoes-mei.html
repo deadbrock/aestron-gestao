@@ -10,6 +10,9 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="bi bi-calendar-check"></i> Obrigações MEI</h1>
             <div>
+                <button class="btn btn-info" onclick="atualizarValorDAS(2026)" title="Atualizar valores dos DAS 2026 para R$ 82,00">
+                    <i class="bi bi-arrow-clockwise"></i> Atualizar DAS 2026
+                </button>
                 <button class="btn btn-warning" onclick="gerarDAS(2026)">
                     <i class="bi bi-calendar-plus"></i> Gerar DAS 2026
                 </button>
@@ -299,14 +302,28 @@
         }
         
         async function gerarDAS(ano) {
-            if (!confirm(`Gerar DAS para todo o ano de ${ano}?`)) return;
+            if (!confirm(`Gerar DAS para todo o ano de ${ano}?\n\nOs DAS serão gerados com valor de R$ 82,00.`)) return;
             
             try {
-                await fetch(`/api/obrigacoes-mei/gerar-das/${ano}`, { method: 'POST' });
+                const response = await fetch(`/api/obrigacoes-mei/gerar-das/${ano}`, { method: 'POST' });
+                const message = await response.text();
                 carregarObrigacoes();
-                exibirMensagem('success', `DAS gerado com sucesso para ${ano}!`);
+                exibirMensagem('success', message || `DAS gerado com sucesso para ${ano}!`);
             } catch (error) {
                 exibirMensagem('danger', 'Erro ao gerar DAS');
+            }
+        }
+        
+        async function atualizarValorDAS(ano) {
+            if (!confirm(`Atualizar valores dos DAS de ${ano} para R$ 82,00?\n\nApenas DAS não pagos serão atualizados.`)) return;
+            
+            try {
+                const response = await fetch(`/api/obrigacoes-mei/atualizar-das/${ano}`, { method: 'POST' });
+                const message = await response.text();
+                carregarObrigacoes();
+                exibirMensagem('success', message || `Valores dos DAS atualizados para ${ano}!`);
+            } catch (error) {
+                exibirMensagem('danger', 'Erro ao atualizar valores dos DAS');
             }
         }
         
