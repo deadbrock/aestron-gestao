@@ -9,7 +9,7 @@
     <div class="content">
 <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="bi bi-box-seam"></i> Portfolio de Produtos e Serviços</h1>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPortfolio">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPortfolio" onclick="prepararNovoPortfolio()">
                 <i class="bi bi-plus-circle"></i> Novo Produto/Serviço
             </button>
         </div>
@@ -326,6 +326,20 @@
                 document.getElementById('totalCategorias').textContent = categorias;
             }
             
+            function prepararNovoPortfolio() {
+                // Limpar formulário
+                document.getElementById('formPortfolio').reset();
+                document.getElementById('portfolioId').value = '';
+                document.getElementById('ativo').checked = true; // Ativo por padrão
+                
+                // Ocultar campos de desenvolvimento
+                document.getElementById('emDesenvolvimento').checked = false;
+                toggleCamposDesenvolvimento();
+                
+                // Resetar título do modal
+                document.querySelector('#modalPortfolio .modal-title').textContent = 'Novo Produto/Serviço';
+            }
+            
             function toggleCamposDesenvolvimento() {
                 const checkbox = document.getElementById('emDesenvolvimento');
                 const campos = document.getElementById('camposDesenvolvimento');
@@ -345,6 +359,8 @@
             
             async function salvarPortfolio() {
                 const emDesenvolvimento = document.getElementById('emDesenvolvimento').checked;
+                const id = document.getElementById('portfolioId').value;
+                const isEdicao = id && id !== '';
                 
                 const portfolio = {
                     nome: document.getElementById('nomePortfolio').value,
@@ -381,19 +397,72 @@
                 }
                 
                 try {
-                    await fetch('/api/portfolio', {
-                        method: 'POST',
+                    const url = isEdicao ? `/api/portfolio/${id}` : '/api/portfolio';
+                    const method = isEdicao ? 'PUT' : 'POST';
+                    
+                    await fetch(url, {
+                        method: method,
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(portfolio)
                     });
                     
                     bootstrap.Modal.getInstance(document.getElementById('modalPortfolio')).hide();
                     document.getElementById('formPortfolio').reset();
+                    document.getElementById('portfolioId').value = ''; // Limpar ID
+                    document.querySelector('#modalPortfolio .modal-title').textContent = 'Novo Produto/Serviço'; // Resetar título
                     toggleCamposDesenvolvimento(); // Ocultar campos de desenvolvimento
                     carregarPortfolio();
-                    exibirMensagem('success', 'Produto cadastrado com sucesso!');
+                    exibirMensagem('success', isEdicao ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!');
                 } catch (error) {
                     exibirMensagem('danger', 'Erro ao salvar produto');
+                }
+            }
+            
+            async function editarPortfolio(id) {
+                try {
+                    const response = await fetch(`/api/portfolio/${id}`);
+                    const produto = await response.json();
+                    
+                    // Preencher campos básicos
+                    document.getElementById('portfolioId').value = produto.id;
+                    document.getElementById('nomePortfolio').value = produto.nome;
+                    document.getElementById('tipoPortfolio').value = produto.tipo;
+                    document.getElementById('descricaoPortfolio').value = produto.descricao || '';
+                    document.getElementById('precoPortfolio').value = produto.preco || '';
+                    document.getElementById('custoProducao').value = produto.custoProducao || '';
+                    document.getElementById('categoriaPortfolio').value = produto.categoria || '';
+                    document.getElementById('especificacoes').value = produto.especificacoesTecnicas || '';
+                    document.getElementById('beneficios').value = produto.beneficios || '';
+                    document.getElementById('tempoEntrega').value = produto.tempoEntregaDias || '';
+                    document.getElementById('garantiaMeses').value = produto.garantiaMeses || '';
+                    document.getElementById('estoque').value = produto.quantidadeEstoque || '';
+                    document.getElementById('ativo').checked = produto.ativo;
+                    document.getElementById('destaque').checked = produto.destaque;
+                    
+                    // Preencher campos de desenvolvimento
+                    document.getElementById('emDesenvolvimento').checked = produto.emDesenvolvimento || false;
+                    
+                    if (produto.emDesenvolvimento) {
+                        document.getElementById('faseDesenvolvimento').value = produto.faseDesenvolvimento || '';
+                        document.getElementById('dataPrevisaoEntrega').value = produto.dataPrevisaoEntrega || '';
+                        document.getElementById('percentualConclusao').value = produto.percentualConclusao || 0;
+                        document.getElementById('documentacaoAtualizada').checked = produto.documentacaoAtualizada || false;
+                        document.getElementById('testesRealizados').checked = produto.testesRealizados || false;
+                        document.getElementById('homologacaoCliente').checked = produto.homologacaoCliente || false;
+                        document.getElementById('observacoesDesenvolvimento').value = produto.observacoesDesenvolvimento || '';
+                    }
+                    
+                    // Mostrar/ocultar campos de desenvolvimento
+                    toggleCamposDesenvolvimento();
+                    
+                    // Mudar título do modal
+                    document.querySelector('#modalPortfolio .modal-title').textContent = 'Editar Produto/Serviço';
+                    
+                    // Abrir modal
+                    new bootstrap.Modal(document.getElementById('modalPortfolio')).show();
+                } catch (error) {
+                    console.error('Erro ao carregar produto:', error);
+                    exibirMensagem('danger', 'Erro ao carregar dados do produto');
                 }
             }
             
